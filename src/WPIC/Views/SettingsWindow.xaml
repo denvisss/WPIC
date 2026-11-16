@@ -1,0 +1,26 @@
+<Window x:Class="WPIC.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:WPIC.Services"
+        Title="{loc:L10n settings.title}"
+        Style="{DynamicResource {x:Type Window}}"
+        Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" ShowInTaskbar="False">
+    <StackPanel Margin="18,16,18,16">
+        <TextBlock Text="{loc:L10n settings.theme}" FontSize="14" FontWeight="SemiBold"/>
+        <RadioButton x:Name="OptSystem" GroupName="theme" Content="{loc:L10n settings.theme.system}" Margin="0,12,0,0"/>
+        <RadioButton x:Name="OptLight" GroupName="theme" Content="{loc:L10n settings.theme.light}" Margin="0,8,0,0"/>
+        <RadioButton x:Name="OptDark" GroupName="theme" Content="{loc:L10n settings.theme.dark}" Margin="0,8,0,0"/>
+
+        <TextBlock Text="{loc:L10n settings.lang}" FontSize="14" FontWeight="SemiBold" Margin="0,18,0,0"/>
+        <RadioButton x:Name="OptLangSystem" GroupName="lang" Content="{loc:L10n settings.lang.system}" Margin="0,12,0,0"/>
+        <RadioButton x:Name="OptLangRu" GroupName="lang" Content="{loc:L10n settings.lang.ru}" Margin="0,8,0,0"/>
+        <RadioButton x:Name="OptLangEn" GroupName="lang" Content="{loc:L10n settings.lang.en}" Margin="0,8,0,0"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="BtnOk" Style="{DynamicResource PrimaryButton}" Content="{loc:L10n msg.ok}" Click="BtnOk_Click"/>
+            <Button Content="{loc:L10n msg.cancel}" Margin="8,0,0,0" IsCancel="True"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

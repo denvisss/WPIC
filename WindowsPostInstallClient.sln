@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D7DA0BE4-2D7B-4EC9-9841-01A115029955}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPIC", "src\WPIC\WPIC.csproj", "{355DDFB0-2488-4C7C-BA95-CD400800C527}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4EC4A521-9458-421D-B76D-5A2FC6B751C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPIC.Tests", "tests\WPIC.Tests\WPIC.Tests.csproj", "{AFACA973-3830-403E-9E48-71893C8D4A8F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{355DDFB0-2488-4C7C-BA95-CD400800C527}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{355DDFB0-2488-4C7C-BA95-CD400800C527}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{355DDFB0-2488-4C7C-BA95-CD400800C527}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{355DDFB0-2488-4C7C-BA95-CD400800C527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFACA973-3830-403E-9E48-71893C8D4A8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFACA973-3830-403E-9E48-71893C8D4A8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFACA973-3830-403E-9E48-71893C8D4A8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFACA973-3830-403E-9E48-71893C8D4A8F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{355DDFB0-2488-4C7C-BA95-CD400800C527} = {D7DA0BE4-2D7B-4EC9-9841-01A115029955}
+		{AFACA973-3830-403E-9E48-71893C8D4A8F} = {4EC4A521-9458-421D-B76D-5A2FC6B751C7}
+	EndGlobalSection
+EndGlobal

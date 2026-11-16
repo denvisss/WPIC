@@ -1,0 +1,242 @@
+{
+  // Список приложений для вкладки «Приложения» → «Каталог».
+  // Как добавить приложение: скопировать блок и указать wingetId (узнать можно командой: winget search "имя").
+  // description — описание на русском, descriptionEn — на английском (язык интерфейса выбирается в настройках).
+  // wingetIds — несколько пакетов одной записью (ставятся все, уже установленные пропускаются).
+  // windowsFeature — компонент Windows, включаемый через DISM при установке (например NetFx3).
+  // Версии пакетов проверяются при запуске приложения и кэшируются в %LOCALAPPDATA%\WPIC.
+  "categories": [
+    {
+      "name": "Системные",
+      "key": "system",
+      "apps": [
+        {
+          "id": "vcredist", "name": "Microsoft Visual C++ 2005–2022", "wingetId": "Microsoft.VCRedist.2015+.x64",
+          "wingetIds": [
+            "Microsoft.VCRedist.2005.x86", "Microsoft.VCRedist.2005.x64",
+            "Microsoft.VCRedist.2008.x86", "Microsoft.VCRedist.2008.x64",
+            "Microsoft.VCRedist.2010.x86", "Microsoft.VCRedist.2010.x64",
+            "Microsoft.VCRedist.2012.x86", "Microsoft.VCRedist.2012.x64",
+            "Microsoft.VCRedist.2013.x86", "Microsoft.VCRedist.2013.x64",
+            "Microsoft.VCRedist.2015+.x86", "Microsoft.VCRedist.2015+.x64"
+          ],
+          "description": "Все редакции библиотек Visual C++ (x86/x64) — нужны для запуска многих программ и игр.",
+          "descriptionEn": "All Visual C++ runtime libraries (x86/x64) required by many apps and games."
+        },
+        {
+          "id": "directx", "name": "Microsoft DirectX", "wingetId": "Microsoft.DirectX",
+          "description": "Библиотеки DirectX End-User Runtime для старых игр и приложений.",
+          "descriptionEn": "DirectX End-User Runtime libraries for older games and applications."
+        },
+        {
+          "id": "dotnet-framework", "name": "Microsoft .NET Framework 3.5–4.8", "wingetId": "Microsoft.DotNet.Framework.Runtime",
+          "windowsFeature": "NetFx3",
+          "description": "Среда выполнения .NET Framework: компонент 3.5 включается в Windows, runtime 4.8.1 ставится из winget.",
+          "descriptionEn": ".NET Framework runtime: the 3.5 feature is enabled in Windows, the 4.8.1 runtime is installed via winget."
+        },
+        {
+          "id": "java", "name": "Java (Temurin JRE 25)", "wingetId": "EclipseAdoptium.Temurin.25.JRE",
+          "description": "Свободная среда выполнения Java (Eclipse Temurin, LTS) для запуска Java-приложений.",
+          "descriptionEn": "Free Java runtime (Eclipse Temurin, LTS) for running Java applications."
+        },
+        {
+          "id": "terminal", "name": "Windows Terminal", "wingetId": "Microsoft.WindowsTerminal",
+          "description": "Современный терминал с вкладками для PowerShell, CMD и WSL.",
+          "descriptionEn": "Modern tabbed terminal for PowerShell, CMD and WSL."
+        },
+        {
+          "id": "powershell", "name": "PowerShell 7", "wingetId": "Microsoft.PowerShell",
+          "description": "Кроссплатформенная оболочка и язык сценариев.",
+          "descriptionEn": "Cross-platform shell and scripting language."
+        }
+      ]
+    },
+    {
+      "name": "Браузеры",
+      "key": "browsers",
+      "apps": [
+        {
+          "id": "firefox", "name": "Mozilla Firefox", "wingetId": "Mozilla.Firefox",
+          "description": "Браузер с открытым исходным кодом и акцентом на приватность.",
+          "descriptionEn": "Open-source browser focused on privacy."
+        },
+        {
+          "id": "opera", "name": "Opera", "wingetId": "Opera.Opera",
+          "description": "Браузер со встроенным VPN и мессенджерами.",
+          "descriptionEn": "Browser with a built-in VPN and messengers."
+        },
+        {
+          "id": "chrome", "name": "Google Chrome", "wingetId": "Google.Chrome",
+          "description": "Популярный браузер от Google.",
+          "descriptionEn": "Popular browser from Google."
+        },
+        {
+          "id": "chromium", "name": "Chromium", "wingetId": "Hibbiki.Chromium",
+          "description": "Открытые сборки браузера Chromium — основа Chrome без сервисов Google.",
+          "descriptionEn": "Open-source Chromium builds — the base of Chrome without Google services."
+        },
+        {
+          "id": "chromium-gost", "name": "Chromium-Gost", "wingetId": "CryptoPro.Chromium-Gost",
+          "description": "Chromium с поддержкой российской криптографии ГОСТ (КриптоПро).",
+          "descriptionEn": "Chromium with Russian GOST cryptography support (CryptoPro)."
+        },
+        {
+          "id": "yandex", "name": "Яндекс Браузер", "wingetId": "Yandex.Browser",
+          "description": "Браузер Яндекса с Алисой и защитой соединений.",
+          "descriptionEn": "Yandex browser with the Alice assistant and connection protection."
+        },
+        {
+          "id": "tor", "name": "Tor Browser", "wingetId": "TorProject.TorBrowser",
+          "description": "Анонимный браузер через сеть Tor.",
+          "descriptionEn": "Anonymous browser over the Tor network."
+        }
+      ]
+    },
+    {
+      "name": "Утилиты",
+      "key": "utilities",
+      "apps": [
+        {
+          "id": "7zip", "name": "7-Zip", "wingetId": "7zip.7zip",
+          "description": "Бесплатный архиватор с высокой степенью сжатия.",
+          "descriptionEn": "Free archiver with a high compression ratio."
+        },
+        {
+          "id": "winrar", "name": "WinRAR", "wingetId": "RARLab.WinRAR",
+          "description": "Архиватор RAR/ZIP с пробным периодом.",
+          "descriptionEn": "RAR/ZIP archiver with a trial period."
+        },
+        {
+          "id": "powertoys", "name": "Microsoft PowerToys", "wingetId": "Microsoft.PowerToys",
+          "description": "Набор системных утилит от Microsoft: FancyZones, PowerRename и другие.",
+          "descriptionEn": "Microsoft system utilities: FancyZones, PowerRename and more."
+        },
+        {
+          "id": "everything", "name": "Everything", "wingetId": "voidtools.Everything",
+          "description": "Мгновенный поиск файлов по всему диску.",
+          "descriptionEn": "Instant file search across all drives."
+        },
+        {
+          "id": "qbittorrent", "name": "qBittorrent", "wingetId": "qBittorrent.qBittorrent",
+          "description": "Свободный торрент-клиент без рекламы.",
+          "descriptionEn": "Free, ad-free torrent client."
+        },
+        {
+          "id": "notepad-plus", "name": "Notepad++", "wingetId": "Notepad++.Notepad++",
+          "description": "Продвинутый текстовый редактор и редактор кода.",
+          "descriptionEn": "Advanced text and code editor."
+        },
+        {
+          "id": "sumatra", "name": "Sumatra PDF", "wingetId": "SumatraPDF.SumatraPDF",
+          "description": "Лёгкий просмотрщик PDF, EPUB и комиксов.",
+          "descriptionEn": "Lightweight PDF, EPUB and comic book reader."
+        }
+      ]
+    },
+    {
+      "name": "Общение",
+      "key": "communication",
+      "apps": [
+        {
+          "id": "telegram", "name": "Telegram Desktop", "wingetId": "Telegram.TelegramDesktop",
+          "description": "Мессенджер Telegram.",
+          "descriptionEn": "Telegram messenger."
+        },
+        {
+          "id": "whatsapp", "name": "WhatsApp", "wingetId": "9NKSQGP7F2NH",
+          "description": "Мессенджер WhatsApp для компьютера (Microsoft Store).",
+          "descriptionEn": "WhatsApp messenger for desktop (Microsoft Store)."
+        },
+        {
+          "id": "viber", "name": "Viber", "wingetId": "Rakuten.Viber",
+          "description": "Звонки и сообщения Viber.",
+          "descriptionEn": "Viber calls and messages."
+        },
+        {
+          "id": "zoom", "name": "Zoom", "wingetId": "Zoom.Zoom",
+          "description": "Видеоконференции и вебинары.",
+          "descriptionEn": "Video meetings and webinars."
+        },
+        {
+          "id": "discord", "name": "Discord", "wingetId": "Discord.Discord",
+          "description": "Голосовой и текстовый чат для сообществ.",
+          "descriptionEn": "Voice and text chat for communities."
+        }
+      ]
+    },
+    {
+      "name": "Популярное",
+      "key": "popular",
+      "apps": [
+        {
+          "id": "steam", "name": "Steam", "wingetId": "Valve.Steam",
+          "description": "Игровая платформа Valve: магазин, библиотека и сообщество.",
+          "descriptionEn": "Valve's gaming platform: store, library and community."
+        },
+        {
+          "id": "vscode", "name": "Visual Studio Code", "wingetId": "Microsoft.VisualStudioCode",
+          "description": "Лёгкий редактор кода с расширениями для любых языков.",
+          "descriptionEn": "Lightweight code editor with extensions for any language."
+        },
+        {
+          "id": "git", "name": "Git", "wingetId": "Git.Git",
+          "description": "Распределённая система контроля версий.",
+          "descriptionEn": "Distributed version control system."
+        },
+        {
+          "id": "python", "name": "Python 3", "wingetId": "Python.Python.3.14",
+          "description": "Язык программирования Python 3 (актуальная ветка).",
+          "descriptionEn": "Python 3 programming language (current branch)."
+        },
+        {
+          "id": "thunderbird", "name": "Mozilla Thunderbird", "wingetId": "Mozilla.Thunderbird",
+          "description": "Свободный почтовый клиент и календарь.",
+          "descriptionEn": "Free email client and calendar."
+        },
+        {
+          "id": "vlc", "name": "VLC media player", "wingetId": "VideoLAN.VLC",
+          "description": "Универсальный видеоплеер, играет почти всё.",
+          "descriptionEn": "Universal media player that plays almost everything."
+        },
+        {
+          "id": "spotify", "name": "Spotify", "wingetId": "Spotify.Spotify",
+          "description": "Стриминг музыки и подкастов.",
+          "descriptionEn": "Music and podcast streaming."
+        },
+        {
+          "id": "obs", "name": "OBS Studio", "wingetId": "OBSProject.OBSStudio",
+          "description": "Запись и стриминг экрана.",
+          "descriptionEn": "Screen recording and live streaming."
+        }
+      ]
+    },
+    {
+      "name": "Медиа",
+      "key": "media",
+      "apps": [
+        { "id": "spotify", "name": "Spotify", "wingetId": "Spotify.Spotify", "description": "Стриминг музыки и подкастов.", "descriptionEn": "Music and podcast streaming." },
+        { "id": "itunes", "name": "iTunes", "wingetId": "Apple.iTunes", "description": "Медиатека Apple и синхронизация устройств.", "descriptionEn": "Apple media library and device sync." },
+        { "id": "obs", "name": "OBS Studio", "wingetId": "OBSProject.OBSStudio", "description": "Запись и стриминг экрана.", "descriptionEn": "Screen recording and live streaming." },
+        { "id": "audacity", "name": "Audacity", "wingetId": "Audacity.Audacity", "description": "Свободный редактор звука.", "descriptionEn": "Free audio editor." },
+        { "id": "handbrake", "name": "HandBrake", "wingetId": "HandBrake.HandBrake", "description": "Конвертер видео в MP4/MKV.", "descriptionEn": "Video converter to MP4/MKV." },
+        { "id": "gimp", "name": "GIMP", "wingetId": "GIMP.GIMP", "description": "Свободный растровый графический редактор.", "descriptionEn": "Free raster graphics editor." },
+        { "id": "inkscape", "name": "Inkscape", "wingetId": "Inkscape.Inkscape", "description": "Свободный векторный графический редактор.", "descriptionEn": "Free vector graphics editor." },
+        { "id": "klite", "name": "K-Lite Codec Pack Standard", "wingetId": "CodecGuide.K-LiteCodecPack.Standard", "description": "Набор кодеков для воспроизведения видео.", "descriptionEn": "Codec pack for video playback." }
+      ]
+    },
+    {
+      "name": "Проигрыватели",
+      "key": "players",
+      "apps": [
+        { "id": "vlc", "name": "VLC media player", "wingetId": "VideoLAN.VLC", "description": "Универсальный видеоплеер, играет почти всё.", "descriptionEn": "Universal media player that plays almost everything." },
+        { "id": "mpc-be", "name": "Media Player Classic - BE", "wingetId": "MPC-BE.MPC-BE", "description": "Лёгкий видеоплеер (форк MPC-HC).", "descriptionEn": "Lightweight video player (MPC-HC fork)." },
+        { "id": "potplayer", "name": "PotPlayer", "wingetId": "Daum.PotPlayer", "description": "Мощный видеоплеер с тонкой настройкой.", "descriptionEn": "Feature-rich video player with fine-tuning." },
+        { "id": "aimp", "name": "AIMP", "wingetId": "AIMP.AIMP", "description": "Аудиоплеер с библиотекой и радиостанциями.", "descriptionEn": "Audio player with a library and radio stations." },
+        { "id": "musicbee", "name": "MusicBee", "wingetId": "9P4CLT2RJ1RS", "description": "Менеджер музыкальной библиотеки и плеер (Microsoft Store).", "descriptionEn": "Music library manager and player (Microsoft Store)." },
+        { "id": "foobar2000", "name": "foobar2000", "wingetId": "PeterPawlowski.foobar2000", "description": "Лёгкий аудиоплеер для ценителей качества.", "descriptionEn": "Lightweight audio player for quality enthusiasts." },
+        { "id": "smplayer", "name": "SMPlayer", "wingetId": "SMPlayer.SMPlayer", "description": "Видеоплеер с запоминанием позиции воспроизведения.", "descriptionEn": "Video player that remembers playback position." },
+        { "id": "winamp", "name": "Winamp", "wingetId": "Winamp.Winamp", "description": "Легендарный аудиоплеер.", "descriptionEn": "The legendary audio player." }
+      ]
+    }
+  ]
+}

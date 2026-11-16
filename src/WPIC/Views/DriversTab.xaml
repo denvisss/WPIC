@@ -1,0 +1,84 @@
+<UserControl x:Class="WPIC.Views.DriversTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:WPIC.Services">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Margin="8,8,8,0" Padding="14" CornerRadius="10"
+                Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Path Width="18" Height="18" Stretch="Uniform" StrokeThickness="1.8"
+                          Stroke="{DynamicResource Grad.Blue}" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          Data="M2 9 A15 15 0 0 1 22 9 M5 12.5 A10 10 0 0 1 19 12.5 M8.5 16 A5 5 0 0 1 15.5 16 M12 19.5 V19.6"/>
+                    <TextBlock Text="{loc:L10n drivers.offline.title}" FontSize="15" FontWeight="SemiBold"
+                               Margin="9,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="{loc:L10n drivers.offline.desc}" Margin="0,6,0,0" FontSize="12"
+                           Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap"/>
+                <DockPanel Margin="0,10,0,0">
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                        <Button x:Name="BtnNetFix" Style="{DynamicResource PrimaryButton}"
+                                Content="{loc:L10n drivers.offline.fix}" Click="BtnNetFix_Click"/>
+                        <Button x:Name="BtnPackBrowse" Margin="8,0,0,0"
+                                Content="{loc:L10n drivers.offline.browse}" Click="BtnPackBrowse_Click"/>
+                    </StackPanel>
+                    <TextBlock x:Name="TxtPackStatus" Margin="12,0,0,0" VerticalAlignment="Center" FontSize="12"
+                               Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap"/>
+                </DockPanel>
+                <ItemsControl x:Name="ListNetDevices" Margin="0,10,0,0" Visibility="Collapsed">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,6" Padding="10,8" CornerRadius="8"
+                                    Background="{DynamicResource Brush.FieldBg}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="260"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12.5"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding DeviceId}" FontFamily="Consolas" FontSize="11"
+                                               Foreground="{DynamicResource Brush.TextSecondary}"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="10,0"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding State}" FontSize="12"
+                                               Foreground="{DynamicResource Brush.Accent}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="TxtOfflineStatus" Margin="0,8,0,0" FontSize="12"
+                           Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap"/>
+                <TextBlock Text="{loc:L10n drivers.offline.tether}" Margin="0,6,0,0" FontSize="11.5"
+                           Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8">
+            <Button x:Name="BtnLoad" Style="{DynamicResource PrimaryButton}" Content="{loc:L10n drivers.load}" Click="BtnLoad_Click"/>
+            <Button x:Name="BtnProblems" Content="{loc:L10n drivers.problems}" Margin="8,0,0,0" Click="BtnProblems_Click"/>
+            <Button Content="{loc:L10n drivers.openWU}" Margin="8,0,0,0" Click="BtnWindowsUpdate_Click"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Bottom" Margin="8,2" Foreground="#FF777777" TextWrapping="Wrap"
+                   Text="{loc:L10n drivers.hint}"/>
+        <Grid Margin="8">
+            <DataGrid x:Name="GridDrivers" AutoGenerateColumns="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" Visibility="Visible">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.device}" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.vendor}" Binding="{Binding Manufacturer}" Width="180"/>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.version}" Binding="{Binding Version}" Width="140"/>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.date}" Binding="{Binding Date}" Width="110"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <DataGrid x:Name="GridProblems" AutoGenerateColumns="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" Visibility="Collapsed">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.device}" Binding="{Binding Name}" Width="2*"/>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.id}" Binding="{Binding DeviceId}" Width="3*"/>
+                    <DataGridTextColumn Header="{loc:L10n drivers.grid.error}" Binding="{Binding ErrorCode}" Width="2*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </DockPanel>
+</UserControl>

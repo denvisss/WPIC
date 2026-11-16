@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Debug: без UAC (визуальная проверка интерфейса); Release: права администратора -->
+    <ApplicationManifest Condition="'$(Configuration)' != 'Debug'">app.manifest</ApplicationManifest>
+    <ApplicationManifest Condition="'$(Configuration)' == 'Debug'">app.debug.manifest</ApplicationManifest>
+    <RootNamespace>WPIC</RootNamespace>
+    <AssemblyName>WindowsPostInstallClient</AssemblyName>
+    <Version>0.2.0</Version>
+    <Product>Windows Post-Install Client</Product>
+    <AssemblyTitle>Windows Post-Install Client</AssemblyTitle>
+    <Description>Установка приложений, драйверов и твиков после чистой установки Windows</Description>
+    <ApplicationIcon>appicon.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="appicon.ico"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Встроенные ресурсы: portable-сборка из одного exe работает без внешних файлов.
+         7-Zip (LGPL) — извлечение драйверов из внешних паков.
+         WithCulture=false: иначе имена strings.ru/en.json MSBuild считает культурами
+         и уводит ресурсы в спутниковые сборки, недоступные из single-file exe. -->
+    <EmbeddedResource Include="Tools\7za64.exe" LogicalName="WPIC.Tools.7za64.exe"/>
+    <EmbeddedResource Include="configs\apps.json" LogicalName="WPIC.configs.apps.json"/>
+    <EmbeddedResource Include="configs\tweaks.json" LogicalName="WPIC.configs.tweaks.json"/>
+    <EmbeddedResource Include="Resources\strings.ru.json" LogicalName="WPIC.Resources.strings.ru.json" WithCulture="false"/>
+    <EmbeddedResource Include="Resources\strings.en.json" LogicalName="WPIC.Resources.strings.en.json" WithCulture="false"/>
+    <!-- Winget-пак (build/fetch-winget.ps1) встроен в exe: portable ставит winget без интернета.
+         Payload не в git — перед сборкой запустите build/fetch-winget.ps1 (CI делает это сам). -->
+    <EmbeddedResource Include="..\..\build\payload\winget\AppInstaller_x64.msix" LogicalName="WPIC.Winget.AppInstaller_x64.msix"/>
+    <EmbeddedResource Include="..\..\build\payload\winget\Microsoft.VCLibs.x64.14.00.Desktop.appx" LogicalName="WPIC.Winget.Microsoft.VCLibs.x64.14.00.Desktop.appx"/>
+    <EmbeddedResource Include="..\..\build\payload\winget\Microsoft.UI.Xaml.2.8.x64.appx" LogicalName="WPIC.Winget.Microsoft.UI.Xaml.2.8.x64.appx"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Конфиги (список приложений и твиков) копируются рядом с exe, чтобы их можно было править без пересборки -->
+    <None Include="configs\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Файлы локализации -->
+    <None Include="Resources\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

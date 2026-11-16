@@ -1,0 +1,313 @@
+{
+  // Список твиков для вкладки «Твики системы».
+  // Реестр и systemParameter откатываются из исходной копии; команды используют undoCommand.
+  // Уровни риска: green (безопасно), yellow (требует внимания), red (рискованно).
+  "tweaks": [
+    {
+      "id": "show-file-extensions",
+      "category": "explorer",
+      "name": "Показывать расширения файлов",
+      "description": "В Проводнике будут видны расширения всех файлов (.txt, .exe и т.д.). Требует перезапуска Проводника — выполняется автоматически.",
+      "risk": "green",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "valueName": "HideFileExt",
+          "regType": "DWord",
+          "value": "0"
+        },
+        {
+          "type": "command",
+          "command": "taskkill /f /im explorer.exe && start explorer.exe",
+          "undoCommand": "taskkill /f /im explorer.exe && start explorer.exe"
+        }
+      ]
+    },
+    {
+      "id": "show-hidden-files",
+      "category": "explorer",
+      "name": "Показывать скрытые файлы",
+      "description": "Скрытые и системные файлы станут видны в Проводнике. Требует перезапуска Проводника — выполняется автоматически.",
+      "risk": "green",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "valueName": "Hidden",
+          "regType": "DWord",
+          "value": "1"
+        },
+        {
+          "type": "command",
+          "command": "taskkill /f /im explorer.exe && start explorer.exe",
+          "undoCommand": "taskkill /f /im explorer.exe && start explorer.exe"
+        }
+      ]
+    },
+    {
+      "id": "disable-start-recommendations",
+      "category": "start",
+      "name": "Отключить рекламу и рекомендации в меню Пуск",
+      "description": "Пуск перестанет показывать «рекомендуемые» приложения, советы и рекламные уведомления.",
+      "risk": "green",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "valueName": "SubscribedContent-338388Enabled",
+          "regType": "DWord",
+          "value": "0"
+        },
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "valueName": "SubscribedContent-338389Enabled",
+          "regType": "DWord",
+          "value": "0"
+        },
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "valueName": "SubscribedContent-338393Enabled",
+          "regType": "DWord",
+          "value": "0"
+        },
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "valueName": "SubscribedContent-310093Enabled",
+          "regType": "DWord",
+          "value": "0"
+        },
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "valueName": "SystemPaneSuggestionsEnabled",
+          "regType": "DWord",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "id": "disable-explorer-ads",
+      "category": "explorer",
+      "name": "Отключить рекламу в Проводнике",
+      "description": "Проводник перестанет показывать баннеры «синхронизируйте с OneDrive» и подобную рекламу.",
+      "risk": "green",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "valueName": "ShowSyncProviderNotifications",
+          "regType": "DWord",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "id": "disable-bing-search",
+      "category": "start",
+      "name": "Отключить поиск Bing в меню Пуск",
+      "description": "Поиск из меню Пуск перестанет отправлять запросы в интернет (Bing) и будет искать только локально.",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\Explorer",
+          "valueName": "DisableSearchBoxSuggestions",
+          "regType": "DWord",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "id": "disable-telemetry",
+      "category": "privacy",
+      "name": "Отключить телеметрию и службу DiagTrack",
+      "description": "Снижает объём диагностических данных, отправляемых Microsoft, и отключает службу Connected User Experiences and Telemetry.",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "valueName": "AllowTelemetry",
+          "regType": "DWord",
+          "value": "0"
+        },
+        {
+          "type": "command",
+          "command": "sc config DiagTrack start= disabled & sc stop DiagTrack",
+          "undoCommand": "sc config DiagTrack start= auto & sc start DiagTrack"
+        }
+      ]
+    },
+    {
+      "id": "enable-long-paths",
+      "category": "system",
+      "name": "Разрешить длинные пути (свыше 260 символов)",
+      "description": "Windows перестанет ограничивать длину путей 260 символами. Полезно для разработки и архивов с глубокой структурой.",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "registry",
+          "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+          "valueName": "LongPathsEnabled",
+          "regType": "DWord",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "id": "disable-hibernation",
+      "category": "system",
+      "name": "Отключить гибернацию",
+      "description": "Удаляет файл hiberfil.sys (освобождает место на диске) и отключает режим гибернации. Быстрый запуск Windows перестанет работать.",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "command",
+          "command": "powercfg /hibernate off",
+          "undoCommand": "powercfg /hibernate on"
+        }
+      ]
+    },
+    {
+      "id": "explorer-this-pc",
+      "category": "explorer",
+      "name": "Открывать «Этот компьютер» в Проводнике",
+      "description": "Новые окна Проводника открывают «Этот компьютер» вместо главной страницы или быстрого доступа.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "LaunchTo", "value": "1" }
+      ]
+    },
+    {
+      "id": "hide-recent-files",
+      "category": "explorer",
+      "name": "Скрыть недавние файлы и частые папки",
+      "description": "Убирает эти списки из главной страницы и быстрого доступа Проводника. Сами файлы и закреплённые папки не удаляются.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer", "valueName": "ShowRecent", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer", "valueName": "ShowFrequent", "value": "0" }
+      ]
+    },
+    {
+      "id": "confirm-recycle-delete",
+      "category": "explorer",
+      "name": "Подтверждать перемещение файлов в Корзину",
+      "description": "Проводник запрашивает подтверждение перед отправкой файла в Корзину. Не заменяет резервное копирование.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "valueName": "ConfirmFileDelete", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-autoplay",
+      "category": "system",
+      "name": "Отключить автовоспроизведение носителей",
+      "description": "Windows не будет автоматически предлагать или запускать действия при подключении носителя. Файлы можно открыть вручную.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", "valueName": "DisableAutoplay", "value": "1" }
+      ]
+    },
+    {
+      "id": "hide-taskbar-widgets",
+      "category": "start",
+      "name": "Скрыть виджеты и «Новости и интересы»",
+      "description": "Скрывает кнопку виджетов в Windows 11 или новостей в Windows 10 22H2. Компоненты не удаляются.",
+      "risk": "green",
+      "minBuild": 19045,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "minBuild": 19045, "maxBuild": 21999, "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Feeds", "valueName": "ShellFeedsTaskbarViewMode", "value": "2" },
+        { "type": "registry", "minBuild": 22000, "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "TaskbarDa", "value": "0" }
+      ]
+    },
+    {
+      "id": "taskbar-align-left",
+      "category": "start",
+      "name": "Выровнять панель задач по левому краю",
+      "description": "Перемещает кнопку «Пуск» и значки панели задач влево. Только Windows 11.",
+      "risk": "green",
+      "minBuild": 22000,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "TaskbarAl", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-animations",
+      "category": "system",
+      "name": "Отключить анимации интерфейса",
+      "description": "Отключает системные анимации окон, меню, подсказок и списков. Сторонние приложения могут использовать собственные эффекты.",
+      "risk": "green",
+      "actions": [
+        { "type": "systemParameter", "parameter": "animations" }
+      ]
+    },
+    {
+      "id": "disable-transparency",
+      "category": "system",
+      "name": "Отключить эффекты прозрачности",
+      "description": "Делает системные поверхности Windows непрозрачными. Не меняет выбранную светлую или тёмную тему.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "valueName": "EnableTransparency", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-accessibility-hotkeys",
+      "category": "system",
+      "name": "Отключить горячие клавиши залипания и фильтрации",
+      "description": "Пять нажатий Shift и удержание правого Shift больше не включают эти функции. Уже включённые специальные возможности и их параметры сохраняются.",
+      "risk": "yellow",
+      "actions": [
+        { "type": "systemParameter", "parameter": "stickyKeysHotkey" },
+        { "type": "systemParameter", "parameter": "filterKeysHotkey" }
+      ]
+    },
+    {
+      "id": "disable-advertising-id",
+      "category": "privacy",
+      "name": "Отключить рекламный идентификатор",
+      "description": "Запрещает приложениям использовать рекламный идентификатор этого пользователя для персонализации рекламы. Не блокирует всю рекламу.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "valueName": "Enabled", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-delivery-peering",
+      "category": "privacy",
+      "name": "Отключить обмен обновлениями с другими ПК",
+      "description": "Delivery Optimization загружает по HTTP без обмена с другими компьютерами. Центр обновления Windows и Microsoft Store продолжают работать. Политика доступна в Pro, Enterprise и Education, не в Home.",
+      "risk": "yellow",
+      "editions": ["Professional", "ProfessionalN", "ProfessionalEducation", "ProfessionalEducationN", "ProfessionalWorkstation", "ProfessionalWorkstationN", "Enterprise", "EnterpriseN", "EnterpriseS", "EnterpriseSN", "Education", "EducationN", "IoTEnterprise", "IoTEnterpriseS"],
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization", "valueName": "DODownloadMode", "value": "0" }
+      ]
+    },
+    {
+      "id": "hide-lock-screen-notifications",
+      "category": "privacy",
+      "name": "Скрыть уведомления на экране блокировки",
+      "description": "Скрывает обычные уведомления вместе с содержимым до разблокировки. Уведомления в открытом сеансе, звонки и будильники не отключаются.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings", "valueName": "NOC_GLOBAL_SETTING_ALLOW_TOASTS_ABOVE_LOCK", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications", "valueName": "LockScreenToastEnabled", "value": "0" }
+      ]
+    }
+  ]
+}

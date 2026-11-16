@@ -1,0 +1,26 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Исходный пак драйверов: курируется скриптом build/curate-drivers.ps1
+Drivers_26.8_LAN/
+
+# Артефакты подготовки установщика (бинарники воспроизводятся скриптами в build/)
+build/staging/
+build/payload/
+build/winget-inspect/
+build/*.log
+build/curated/
+build/publish/
+build/installer/
+build/winget-fetch/
+build/verification/
+build/index-*.tsv
+build/kept-*.txt
+build/list-*.txt
+build/prune/
+build/dedupe/
+build/release/
+build/publish-portable/
