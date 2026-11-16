@@ -10,6 +10,12 @@
                 <Button x:Name="BtnRefresh" Content="{loc:L10n bloat.refresh}" Margin="0,0,8,8" Click="BtnRefresh_Click"/>
                 <Button x:Name="BtnRestorePoint" Content="{loc:L10n tweaks.restorePoint}" Margin="0,0,8,8" Click="BtnRestorePoint_Click"/>
             </WrapPanel>
+            <Grid Margin="0,2,0,6">
+                <TextBox x:Name="TxtSearch" Padding="10,7" FontSize="13" TextChanged="TxtSearch_TextChanged"/>
+                <TextBlock x:Name="TxtSearchHint" Text="{loc:L10n bloat.searchHint}"
+                           Foreground="{DynamicResource Brush.TextSecondary}" Margin="12,0,0,0"
+                           VerticalAlignment="Center" IsHitTestVisible="False"/>
+            </Grid>
             <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
                 <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Success}" VerticalAlignment="Center"/>
                 <TextBlock Text="{loc:L10n tweaks.risk.green}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>

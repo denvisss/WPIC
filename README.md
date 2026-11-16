@@ -28,7 +28,7 @@ WPIC is a WPF desktop utility for the first minutes after a clean Windows instal
 - 🗂 **App catalog** — 49 apps in 7 sections with RU/EN descriptions and live version badges refreshed from winget at every startup; multi-select + batch install.
 - 🔍 **winget search** — search the whole winget repository and install anything from it.
 - 🛠 **20 system tweaks** — grouped by category, risk-marked, snapshotted before apply, one-click undo.
-- 🧹 **Built-in app removal** — lists Windows Appx apps with their icons, install dates and per-app removal risk; remove for the current user and restore later from the built-in Windows image.
+- 🧹 **Built-in app removal** — curated catalog of Windows UWP apps with icons, install dates, name search and per-app removal risk; verified removal for the current user, optional provisioned cleanup, restore from the built-in Windows image.
 - ⬆️ **Self-update** — checks GitHub releases at startup (red dot on the settings gear); updates in place from Settings.
 - 💬 **Feedback** — "Contact the developer" opens the repository Discussions.
 - 🌐 **Bilingual UI** — English / Russian, dark / light themes.
@@ -119,9 +119,9 @@ Before applying, registry values and system parameters are snapshotted to `%LOCA
 
 ## 🧹 Built-in app removal
 
-The tab between *Apps* and *System tweaks* lists the built-in Windows Appx packages (main packages only) with their real icons, localized names and install dates. Every row carries a removal-risk dot — green *safe*, yellow *use with care*, red *risky* — based on a curated classification (Store, winget, Security and shell components are red; optional inbox apps are green). System packages flagged non-removable cannot be selected.
+The tab between *Apps* and *System tweaks* shows the built-in Windows UWP apps from a curated catalog (only the ones actually installed), with their real icons, localized names and install dates, plus a name search box. Every row carries a removal-risk dot — green *safe*, yellow *use with care*, red *risky* — based on a curated classification (Store, winget, Security and Edge are red; optional inbox apps are green). System packages flagged non-removable cannot be selected.
 
-Removal runs `Remove-AppxPackage` for the current user only. Apps removed via WPIC are recorded in `%LOCALAPPDATA%\WPIC\bloat-removed.json` and shown in a separate group, from where they can be re-registered from the built-in Windows image (`Add-AppxPackage -RegisterByFamilyName`). Both actions ask for confirmation with a section-specific warning; a restore point can be created from the same toolbar.
+Removal runs `Remove-AppxPackage` for the current user only and then re-queries the system to confirm the package is really gone (a silent no-op is reported as a failure). The confirmation dialog offers an option to also remove the provisioned package (`Remove-AppxProvisionedPackage -Online`) so the app does not return for new users. Apps removed via WPIC are recorded in `%LOCALAPPDATA%\WPIC\bloat-removed.json` and shown in a separate group, from where they can be re-registered from the built-in Windows image (`Add-AppxPackage -RegisterByFamilyName`). Both actions ask for confirmation with a section-specific warning; a restore point can be created from the same toolbar.
 
 ## ⬆️ Updates & feedback
 
@@ -231,7 +231,7 @@ WPIC — утилита (WPF, .NET 8) для первых минут после 
 - 🗂 **Каталог** — 49 приложений в 7 разделах, описания RU/EN и бейджи версий, обновляемые из winget при каждом запуске; выбор галочками и пакетная установка.
 - 🔍 **Поиск в winget** — установка любых пакетов репозитория.
 - 🛠 **20 твиков** — категории, отметки риска, снимок значений до применения, откат одной кнопкой.
-- 🧹 **Удаление встроенных приложений** — список Appx-приложений Windows с иконками, датами установки и отметкой риска удаления; удаление для текущего пользователя и восстановление из встроенного образа Windows.
+- 🧹 **Удаление встроенных приложений** — курируемый каталог UWP-приложений Windows с иконками, датами установки, поиском и отметкой риска удаления; проверенное удаление для текущего пользователя, опциональная чистка provisioned, восстановление из встроенного образа Windows.
 - ⬆️ **Самообновление** — проверка релизов GitHub при запуске (красная точка на шестерёнке настроек); обновление поверх текущей версии из настроек.
 - 💬 **Обратная связь** — «Написать разработчику» открывает Discussions репозитория.
 - 🌐 **Интерфейс** — русский/английский, тёмная/светлая темы.
@@ -324,9 +324,9 @@ Zip-варианты содержат тот же exe, что и одноимё�
 
 ## 🧹 Удаление встроенных приложений
 
-Вкладка между «Приложения» и «Твики системы» показывает встроенные Appx-пакеты Windows (только main-пакеты) с настоящими иконками, локализованными именами и датами установки. У каждой строки — точка риска удаления: зелёная «безопасно», жёлтая «требует внимания», красная «рискованно» (магазин, winget, безопасность и компоненты оболочки — красные; необязательные приложения — зелёные). Системные пакеты с признаком non-removable выбрать нельзя.
+Вкладка между «Приложения» и «Твики системы» показывает встроенные UWP-приложения Windows из курируемого каталога (только реально установленные) с настоящими иконками, локализованными именами и датами установки, плюс поиск по названию. У каждой строки — точка риска удаления: зелёная «безопасно», жёлтая «требует внимания», красная «рискованно» (магазин, winget, безопасность и Edge — красные; необязательные приложения — зелёные). Системные пакеты с признаком non-removable выбрать нельзя.
 
-Удаление выполняется `Remove-AppxPackage` только для текущего пользователя. Удалённые через WPIC приложения запоминаются в `%LOCALAPPDATA%\WPIC\bloat-removed.json` и показываются отдельной группой — оттуда их можно заново зарегистрировать из встроенного образа Windows (`Add-AppxPackage -RegisterByFamilyName`). Оба действия спрашивают подтверждение с предупреждением по смыслу раздела; точка восстановления создаётся с той же панели.
+Удаление выполняется `Remove-AppxPackage` только для текущего пользователя, после чего система перепроверяется: если пакет остался (команда могла завершиться «успешно» без эффекта), это фиксируется как ошибка. В окне подтверждения есть опция также удалить provisioned-пакет (`Remove-AppxProvisionedPackage -Online`), чтобы приложение не возвращалось для новых пользователей. Удалённые через WPIC приложения запоминаются в `%LOCALAPPDATA%\WPIC\bloat-removed.json` и показываются отдельной группой — оттуда их можно заново зарегистрировать из встроенного образа Windows (`Add-AppxPackage -RegisterByFamilyName`). Оба действия спрашивают подтверждение с предупреждением по смыслу раздела; точка восстановления создаётся с той же панели.
 
 ## ⬆️ Обновления и обратная связь
 

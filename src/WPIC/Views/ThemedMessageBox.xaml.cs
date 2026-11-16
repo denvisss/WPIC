@@ -45,6 +45,39 @@ public partial class ThemedMessageBox : Window
         return box._result;
     }
 
+    /// <summary>Диалог с дополнительным чекбоксом-опцией (например, удаление provisioned-пакетов).</summary>
+    public static MessageBoxResult ShowWithOption(
+        string text,
+        string title,
+        MessageBoxButton buttons,
+        MessageBoxImage image,
+        Window? owner,
+        string optionText,
+        out bool optionChecked)
+    {
+        var box = new ThemedMessageBox
+        {
+            Title = string.IsNullOrWhiteSpace(title) ? L10n.T("app.name") : title
+        };
+        box.Initialize(text, buttons, image);
+        ((TextBlock)box.ChkOption.Content).Text = optionText;
+        box.ChkOption.Visibility = Visibility.Visible;
+
+        if (owner != null)
+        {
+            box.Owner = owner;
+            box.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        }
+        else
+        {
+            box.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        box.ShowDialog();
+        optionChecked = box.ChkOption.IsChecked == true;
+        return box._result;
+    }
+
     private void Initialize(string text, MessageBoxButton buttons, MessageBoxImage image)
     {
         TxtMessage.Text = text;

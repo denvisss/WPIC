@@ -27,14 +27,110 @@ public class RemovedAppRecord
     public DateTime RemovedUtc { get; set; }
 }
 
+public class ProvisionedPackage
+{
+    public string DisplayName { get; set; } = "";
+    public string PackageName { get; set; } = "";
+}
+
 /// <summary>
-/// Список встроенных приложений Windows (Appx, только Main-пакеты), удаление для текущего
-/// пользователя и восстановление из встроенного образа Windows. Удалённые через WPIC
-/// приложения запоминаются в bloat-removed.json, чтобы их можно было вернуть.
+/// Курируемый список встроенных UWP-приложений Windows: показываются только установленные
+/// приложения из каталога (Appx, Main-пакеты). Удаление для текущего пользователя с проверкой
+/// факта удаления, опционально вместе с provisioned-пакетом; восстановление из встроенного
+/// образа Windows. Удалённые через WPIC приложения запоминаются в bloat-removed.json.
 /// </summary>
 public static class BuiltinAppService
 {
     private static string RemovedFile => Path.Combine(LogService.DataDirectory, "bloat-removed.json");
+
+    /// <summary>Встроенные UWP-приложения Windows 10/11 (точные имена пакетов Get-AppxPackage).</summary>
+    public static readonly IReadOnlyCollection<string> Catalog = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        // необязательные приложения
+        "Microsoft.549981C3F5F10",
+        "Microsoft.Windows.Cortana",
+        "Microsoft.BingNews",
+        "Microsoft.BingWeather",
+        "Microsoft.BingSearch",
+        "Microsoft.GetHelp",
+        "Microsoft.Getstarted",
+        "Microsoft.MicrosoftOfficeHub",
+        "Microsoft.MicrosoftSolitaireCollection",
+        "Microsoft.MixedReality.Portal",
+        "Microsoft.MixedReality.OpenXR",
+        "Microsoft.Office.OneNote",
+        "Microsoft.People",
+        "Microsoft.SkypeApp",
+        "Microsoft.WindowsFeedbackHub",
+        "Microsoft.WindowsMaps",
+        "Microsoft.Wallet",
+        "Microsoft.Xbox.TCUI",
+        "Microsoft.XboxApp",
+        "Microsoft.XboxGameOverlay",
+        "Microsoft.XboxGamingOverlay",
+        "Microsoft.XboxIdentityProvider",
+        "Microsoft.XboxSpeechToTextOverlay",
+        "Microsoft.YourPhone",
+        "Microsoft.ZuneMusic",
+        "Microsoft.ZuneVideo",
+        "Microsoft.3DBuilder",
+        "Microsoft.Print3D",
+        "Microsoft.MSPaint",
+        "Microsoft.Todos",
+        "Microsoft.PowerAutomateDesktop",
+        "Microsoft.Clipchamp",
+        "Microsoft.OutlookForWindows",
+        "Microsoft.Windows.DevHome",
+        "MicrosoftCorporationII.QuickAssist",
+        "MicrosoftCorporationII.MicrosoftFamily",
+        "Microsoft.LinkedIn",
+        "Microsoft.Windows.ParentalControls",
+        "microsoft.windowscommunicationsapps",
+        "Microsoft.Whiteboard",
+        "Microsoft.MicrosoftJournal",
+        // полезные инструменты — удаление не ломает систему, но лишает привычных функций
+        "Microsoft.WindowsCalculator",
+        "Microsoft.WindowsCamera",
+        "Microsoft.WindowsAlarms",
+        "Microsoft.WindowsSoundRecorder",
+        "Microsoft.Windows.Photos",
+        "Microsoft.WindowsNotepad",
+        "Microsoft.WindowsTerminal",
+        "Microsoft.Paint",
+        "Microsoft.ScreenSketch",
+        "Microsoft.MicrosoftStickyNotes",
+        "Microsoft.GamingApp",
+        "MicrosoftWindows.Client.WebExperience",
+        "Microsoft.HEIFImageExtension",
+        "Microsoft.HEVCVideoExtension",
+        "Microsoft.VP9VideoExtensions",
+        "Microsoft.WebpImageExtension",
+        "Microsoft.RawImageExtension",
+        "Microsoft.WebMediaExtensions",
+        // критичные компоненты — удаление рискованно
+        "Microsoft.WindowsStore",
+        "Microsoft.StorePurchaseApp",
+        "Microsoft.DesktopAppInstaller",
+        "Microsoft.SecHealthUI",
+        "Microsoft.Windows.SecHealthUI",
+        "Microsoft.MicrosoftEdge",
+        "Microsoft.MicrosoftEdge.Stable"
+    };
+
+    public static bool InCatalog(string packageName) => Catalog.Contains(packageName);
+
+    /// <summary>Оставляет только приложения из каталога; из нескольких версий берёт новейшую.</summary>
+    public static List<BuiltinApp> MatchCatalog(List<BuiltinApp> packages) =>
+        packages.Where(p => InCatalog(p.Name))
+            .GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(PackageVersion).First())
+            .ToList();
+
+    private static Version PackageVersion(BuiltinApp app)
+    {
+        var parts = app.PackageFullName.Split('_');
+        return parts.Length > 1 && Version.TryParse(parts[1], out var version) ? version : new Version(0, 0);
+    }
 
     public static async Task<List<BuiltinApp>> ListAsync(CancellationToken ct = default)
     {
@@ -44,7 +140,7 @@ public static class BuiltinAppService
             "Select-Object Name, PackageFullName, PackageFamilyName, InstallLocation, NonRemovable | " +
             "ConvertTo-Json -Depth 3";
         var json = await RunPowerShellAsync(script, ct);
-        var apps = ParsePackages(json);
+        var apps = MatchCatalog(ParsePackages(json));
         foreach (var app in apps)
         {
             var (displayName, iconPath) = ReadManifest(app.InstallLocation);
@@ -194,7 +290,17 @@ public static class BuiltinAppService
         ["Microsoft.OutlookForWindows"] = "Outlook",
         ["Microsoft.Windows.DevHome"] = "Dev Home",
         ["Microsoft.BingSearch"] = "Bing Search",
-        ["Microsoft.LinkedIn"] = "LinkedIn"
+        ["Microsoft.LinkedIn"] = "LinkedIn",
+        ["Microsoft.Windows.Cortana"] = "Cortana",
+        ["microsoft.windowscommunicationsapps"] = "Mail & Calendar",
+        ["Microsoft.GamingApp"] = "Xbox",
+        ["MicrosoftCorporationII.MicrosoftFamily"] = "Family Safety",
+        ["Microsoft.HEIFImageExtension"] = "HEIF Image Extension",
+        ["Microsoft.HEVCVideoExtension"] = "HEVC Video Extension",
+        ["Microsoft.VP9VideoExtensions"] = "VP9 Video Extensions",
+        ["Microsoft.WebpImageExtension"] = "Webp Image Extension",
+        ["Microsoft.RawImageExtension"] = "Raw Image Extension",
+        ["Microsoft.WebMediaExtensions"] = "Web Media Extensions"
     };
 
     /// <summary>Насколько безопасно удалять приложение: green | yellow | red.</summary>
@@ -244,6 +350,11 @@ public static class BuiltinAppService
     private static readonly HashSet<string> Green = new(StringComparer.OrdinalIgnoreCase)
     {
         "Microsoft.549981C3F5F10",
+        "Microsoft.Windows.Cortana",
+        "microsoft.windowscommunicationsapps",
+        "Microsoft.Whiteboard",
+        "Microsoft.MicrosoftJournal",
+        "MicrosoftCorporationII.MicrosoftFamily",
         "Microsoft.BingNews",
         "Microsoft.BingWeather",
         "Microsoft.BingSearch",
@@ -317,13 +428,21 @@ public static class BuiltinAppService
         File.WriteAllText(RemovedFile, JsonSerializer.Serialize(records, Json.Options));
     }
 
-    public static async Task RemoveAsync(BuiltinApp app, IProgress<string>? log = null, CancellationToken ct = default)
+    public static async Task RemoveAsync(BuiltinApp app, IProgress<string>? log = null, bool removeProvisioned = false, CancellationToken ct = default)
     {
         log?.Report(L10n.T("bloat.log.removing", app.DisplayName));
         var script =
             "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n" +
             $"Remove-AppxPackage -Package '{Escape(app.PackageFullName)}' -ErrorAction Stop";
         await RunPowerShellAsync(script, ct);
+
+        // Remove-AppxPackage может завершиться успешно, не удалив пакет, — проверяем факт
+        var check =
+            "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n" +
+            $"if (Get-AppxPackage | Where-Object {{ $_.PackageFullName -eq '{Escape(app.PackageFullName)}' }}) {{ 'present' }}";
+        if ((await RunPowerShellAsync(check, ct)).Contains("present"))
+            throw new InvalidOperationException(L10n.T("bloat.err.stillPresent"));
+
         var records = LoadRemoved();
         records.RemoveAll(r => r.PackageFamilyName == app.PackageFamilyName);
         records.Add(new RemovedAppRecord
@@ -335,7 +454,57 @@ public static class BuiltinAppService
         });
         SaveRemoved(records);
         log?.Report(L10n.T("bloat.log.removed", app.DisplayName));
+
+        if (removeProvisioned)
+            await RemoveProvisionedAsync(app.Name, log, ct);
     }
+
+    /// <summary>Удаляет provisioned-пакет, чтобы приложение не ставилось новым пользователям.</summary>
+    private static async Task RemoveProvisionedAsync(string appName, IProgress<string>? log, CancellationToken ct)
+    {
+        try
+        {
+            const string listScript =
+                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n" +
+                "Get-AppxProvisionedPackage -Online | Select-Object DisplayName, PackageName | ConvertTo-Json -Depth 3";
+            var match = MatchProvisioned(ParseProvisioned(await RunPowerShellAsync(listScript, ct)), appName);
+            if (match == null)
+            {
+                log?.Report(L10n.T("bloat.log.provisionedNone", appName));
+                return;
+            }
+            var script =
+                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n" +
+                $"Remove-AppxProvisionedPackage -Online -PackageName '{Escape(match.PackageName)}' -ErrorAction Stop | Out-Null";
+            await RunPowerShellAsync(script, ct);
+            log?.Report(L10n.T("bloat.log.provisionedRemoved", appName));
+        }
+        catch (Exception ex)
+        {
+            // приложение уже удалено для текущего пользователя; provisioned — дополнительная опция
+            log?.Report(L10n.T("bloat.log.provisionedError", appName, ex.Message));
+        }
+    }
+
+    public static List<ProvisionedPackage> ParseProvisioned(string json)
+    {
+        json = json.Trim();
+        if (json.Length == 0) return new List<ProvisionedPackage>();
+        try
+        {
+            if (json.StartsWith("["))
+                return JsonSerializer.Deserialize<List<ProvisionedPackage>>(json, Json.Options) ?? new List<ProvisionedPackage>();
+            var single = JsonSerializer.Deserialize<ProvisionedPackage>(json, Json.Options);
+            return single == null ? new List<ProvisionedPackage>() : new List<ProvisionedPackage> { single };
+        }
+        catch (JsonException)
+        {
+            return new List<ProvisionedPackage>();
+        }
+    }
+
+    public static ProvisionedPackage? MatchProvisioned(List<ProvisionedPackage> packages, string appName) =>
+        packages.FirstOrDefault(p => string.Equals(p.DisplayName, appName, StringComparison.OrdinalIgnoreCase));
 
     public static async Task RestoreAsync(RemovedAppRecord record, IProgress<string>? log = null, CancellationToken ct = default)
     {

@@ -37,7 +37,7 @@ public partial class BuiltinAppsTab : UserControl
             var apps = await Task.Run(() => BuiltinAppService.ListAsync());
             var installedFamilies = new HashSet<string>(apps.Select(a => a.PackageFamilyName), StringComparer.OrdinalIgnoreCase);
             var removed = BuiltinAppService.LoadRemoved()
-                .Where(r => !installedFamilies.Contains(r.PackageFamilyName))
+                .Where(r => BuiltinAppService.InCatalog(r.Name) && !installedFamilies.Contains(r.PackageFamilyName))
                 .ToList();
             _items = apps.Select(a => new BuiltinAppVm(a))
                 .Concat(removed.Select(r => new BuiltinAppVm(r)))
@@ -60,9 +60,23 @@ public partial class BuiltinAppsTab : UserControl
     private void ApplyView()
     {
         var view = (ListCollectionView)CollectionViewSource.GetDefaultView(_items);
+        var search = TxtSearch.Text.Trim();
+        view.Filter = o =>
+        {
+            if (search.Length == 0) return true;
+            var vm = (BuiltinAppVm)o;
+            return vm.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                   || vm.PackageName.Contains(search, StringComparison.OrdinalIgnoreCase);
+        };
         view.GroupDescriptions.Clear();
         view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(BuiltinAppVm.Group)));
         ItemsApps.ItemsSource = view;
+    }
+
+    private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        TxtSearchHint.Visibility = string.IsNullOrEmpty(TxtSearch.Text) ? Visibility.Visible : Visibility.Collapsed;
+        if (_loaded) ApplyView();
     }
 
     private async void BtnRemove_Click(object sender, RoutedEventArgs e)
@@ -76,8 +90,9 @@ public partial class BuiltinAppsTab : UserControl
             return;
         }
 
-        var confirm = ThemedMessageBox.Show(L10n.T("bloat.confirm.remove", selected.Count),
-            L10n.T("bloat.title.remove"), MessageBoxButton.YesNo, MessageBoxImage.Warning, Window.GetWindow(this));
+        var confirm = ThemedMessageBox.ShowWithOption(L10n.T("bloat.confirm.remove", selected.Count),
+            L10n.T("bloat.title.remove"), MessageBoxButton.YesNo, MessageBoxImage.Warning, Window.GetWindow(this),
+            L10n.T("bloat.provisioned.option"), out var removeProvisioned);
         if (confirm != MessageBoxResult.Yes) return;
 
         SetBusy(true);
@@ -88,7 +103,7 @@ public partial class BuiltinAppsTab : UserControl
             {
                 try
                 {
-                    await Task.Run(() => BuiltinAppService.RemoveAsync(item.App!, progress));
+                    await Task.Run(() => BuiltinAppService.RemoveAsync(item.App!, progress, removeProvisioned));
                 }
                 catch (Exception ex)
                 {

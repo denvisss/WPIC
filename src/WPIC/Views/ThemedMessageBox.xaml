@@ -13,6 +13,11 @@
                        VerticalAlignment="Top" Text=""/>
             <TextBlock x:Name="TxtMessage" TextWrapping="Wrap" FontSize="13" LineHeight="19"/>
         </DockPanel>
+        <CheckBox x:Name="ChkOption" Visibility="Collapsed" Margin="0,14,0,0" FontSize="13">
+            <CheckBox.Content>
+                <TextBlock TextWrapping="Wrap" MaxWidth="360"/>
+            </CheckBox.Content>
+        </CheckBox>
         <StackPanel x:Name="ButtonsPanel" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0"/>
     </StackPanel>
 </Window>

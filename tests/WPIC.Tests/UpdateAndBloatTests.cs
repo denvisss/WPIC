@@ -100,11 +100,74 @@ public class BuiltinAppServiceTests
         Assert.Empty(BuiltinAppService.ParsePackages("broken {"));
     }
 
+    [Fact]
+    public void Catalog_IsUniqueAndClassified()
+    {
+        Assert.True(BuiltinAppService.Catalog.Count >= 50);
+        Assert.Equal(BuiltinAppService.Catalog.Count,
+            BuiltinAppService.Catalog.Select(n => n.ToLowerInvariant()).Distinct().Count());
+        foreach (var name in BuiltinAppService.Catalog)
+            Assert.Contains(BuiltinAppService.RiskOf(name), new[] { "green", "yellow", "red" });
+    }
+
+    [Fact]
+    public void MatchCatalog_KeepsOnlyCatalogAppsAndNewestVersion()
+    {
+        static BuiltinApp Pkg(string name, string version) => new()
+        {
+            Name = name,
+            PackageFullName = $"{name}_{version}_x64__8wekyb3d8bbwe",
+            PackageFamilyName = name + "_8wekyb3d8bbwe"
+        };
+        var input = new List<BuiltinApp>
+        {
+            Pkg("Microsoft.WindowsCalculator", "11.2405.0.0"),
+            Pkg("Microsoft.WindowsCalculator", "11.2501.1.0"),
+            Pkg("microsoft.windowscalculator", "10.0.0.0"),
+            Pkg("Microsoft.BingWeather", "4.5.3.0"),
+            Pkg("Microsoft.AAD.BrokerPlugin", "1.0.0.0"),
+            Pkg("1527c705-839a-4832-9118-54d4bd6a0c89", "1.0.0.0"),
+            Pkg("SpotifyAB.SpotifyMusic", "1.0.0.0")
+        };
+        var matched = BuiltinAppService.MatchCatalog(input);
+        Assert.Equal(2, matched.Count);
+        var calc = matched.Single(a => a.Name.Equals("Microsoft.WindowsCalculator", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("11.2501.1.0", calc.PackageFullName.Split('_')[1]);
+        Assert.Contains(matched, a => a.Name == "Microsoft.BingWeather");
+        Assert.True(BuiltinAppService.InCatalog("MICROSOFT.WINDOWSSTORE"));
+        Assert.False(BuiltinAppService.InCatalog("Microsoft.AAD.BrokerPlugin"));
+    }
+
+    [Fact]
+    public void ParseProvisioned_SingleObjectAndArray()
+    {
+        var single = "{\"DisplayName\":\"Microsoft.BingWeather\",\"PackageName\":\"Microsoft.BingWeather_4.5.3.0_neutral_~_8wekyb3d8bbwe\"}";
+        var list = BuiltinAppService.ParseProvisioned(single);
+        Assert.Single(list);
+        Assert.Equal("Microsoft.BingWeather", list[0].DisplayName);
+        var array = "[" + single + "," + single.Replace("BingWeather", "ZuneVideo") + "]";
+        Assert.Equal(2, BuiltinAppService.ParseProvisioned(array).Count);
+        Assert.Empty(BuiltinAppService.ParseProvisioned(""));
+        Assert.Empty(BuiltinAppService.ParseProvisioned("broken {"));
+    }
+
+    [Fact]
+    public void MatchProvisioned_ExactCaseInsensitiveMatch()
+    {
+        var packages = BuiltinAppService.ParseProvisioned(
+            "[{\"DisplayName\":\"Microsoft.BingWeather\",\"PackageName\":\"Microsoft.BingWeather_4.5.3.0_neutral_~_8wekyb3d8bbwe\"}]");
+        Assert.NotNull(BuiltinAppService.MatchProvisioned(packages, "microsoft.bingweather"));
+        Assert.Null(BuiltinAppService.MatchProvisioned(packages, "Microsoft.Bing"));
+        Assert.Null(BuiltinAppService.MatchProvisioned(packages, "Microsoft.ZuneVideo"));
+    }
+
     [Theory]
     [InlineData("Microsoft.WindowsCalculator", "Windows Calculator")]
     [InlineData("Microsoft.549981C3F5F10", "Cortana")]
     [InlineData("Microsoft.MicrosoftEdge.Stable", "Microsoft Edge")]
     [InlineData("Microsoft.WindowsSoundRecorder", "Windows Sound Recorder")]
+    [InlineData("microsoft.windowscommunicationsapps", "Mail & Calendar")]
+    [InlineData("Microsoft.GamingApp", "Xbox")]
     public void Prettify_MakesReadableNames(string package, string expected)
     {
         Assert.Equal(expected, BuiltinAppService.Prettify(package));
@@ -117,6 +180,8 @@ public class BuiltinAppServiceTests
     [InlineData("Microsoft.BingWeather", "green")]
     [InlineData("Microsoft.ZuneVideo", "green")]
     [InlineData("Microsoft.WindowsCalculator", "yellow")]
+    [InlineData("Microsoft.Whiteboard", "green")]
+    [InlineData("MicrosoftWindows.Client.WebExperience", "yellow")]
     [InlineData("Some.UnknownApp", "yellow")]
     public void RiskOf_ClassifiesPackages(string package, string expected)
     {
