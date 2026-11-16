@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Media;
 using Microsoft.Win32;
 using WPIC.Models;
 using WPIC.Services;
@@ -12,9 +12,21 @@ namespace WPIC.Views;
 
 public partial class TweaksTab : UserControl
 {
-    private static readonly string[] CategoryOrder = { "explorer", "start", "privacy", "system" };
+    private static readonly string[] CategoryOrder = { "explorer", "start", "privacy", "gaming", "system" };
+
+    private static readonly Dictionary<string, (string Geometry, string Gradient)> CategoryIcons = new()
+    {
+        ["explorer"] = ("M3 7 A2 2 0 0 1 5 5 H9 L11 7 H19 A2 2 0 0 1 21 9 V17 A2 2 0 0 1 19 19 H5 A2 2 0 0 1 3 17 Z", "Grad.Blue"),
+        ["start"] = ("M4 4 H20 V20 H4 Z M4 15 H20 M7 17.5 H11", "Grad.Violet"),
+        ["privacy"] = ("M12 3 L20 6 V11 C20 16 16.5 19.5 12 21 C7.5 19.5 4 16 4 11 V6 Z M8.5 11.5 L11 14 L15.5 9.5", "Grad.Green"),
+        ["gaming"] = ("M7 8 H17 A5 5 0 0 1 22 13 L21.2 16.8 A2.4 2.4 0 0 1 17 17.6 L15.5 16 H8.5 L7 17.6 A2.4 2.4 0 0 1 2.8 16.8 L2 13 A5 5 0 0 1 7 8 Z M8 11 V15 M6 13 H10 M15.5 11.5 H15.51 M18 13.5 H18.01", "Grad.Pink"),
+        ["system"] = ("M4 7 H20 M4 17 H20 M9 4 V10 M15 14 V20", "Grad.Orange")
+    };
+
     private List<TweakVm> _items = new();
-    private string? _filter;
+    private readonly Dictionary<string, CheckBox> _selectAllBoxes = new();
+    private readonly Dictionary<string, bool> _expanded = new();
+    private bool _updatingSelection;
     private bool _loaded;
     private bool _busy;
     private readonly TweakService _service = new(LogService.DataDirectory);
@@ -25,8 +37,7 @@ public partial class TweaksTab : UserControl
         L10n.Instance.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(async () =>
         {
             foreach (var item in _items) item.RefreshLanguage();
-            BuildChips();
-            ApplyView();
+            BuildGroups();
             if (!_busy) await RefreshStatusesAsync();
         });
         Loaded += async (_, _) =>
@@ -43,8 +54,8 @@ public partial class TweaksTab : UserControl
         {
             var catalog = await ConfigService.LoadTweaksAsync();
             _items = catalog.Tweaks.Select(t => new TweakVm(t)).ToList();
-            BuildChips();
-            ApplyView();
+            foreach (var item in _items) item.PropertyChanged += Item_PropertyChanged;
+            BuildGroups();
             await RefreshStatusesAsync();
         }
         catch (Exception ex)
@@ -53,46 +64,101 @@ public partial class TweaksTab : UserControl
         }
     }
 
-    private void BuildChips()
+    private void BuildGroups()
     {
-        PanelCategories.Children.Clear();
-        AddChip($"{L10n.T("tweaks.cat.all")} ({_items.Count})", null);
+        PanelGroups.Children.Clear();
+        _selectAllBoxes.Clear();
+        var template = (DataTemplate)Resources["TweakRowTemplate"];
         foreach (var category in CategoryOrder)
         {
-            var count = _items.Count(i => i.Category == category);
-            if (count == 0) continue;
-            AddChip($"{L10n.T("tweak.cat." + category)} ({count})", category);
+            var group = _items.Where(i => i.Category == category).ToList();
+            if (group.Count == 0) continue;
+
+            var (geometry, gradient) = CategoryIcons[category];
+            var header = new Grid();
+            header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var title = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            title.Children.Add(new System.Windows.Shapes.Path
+            {
+                Width = 18, Height = 18, Stretch = Stretch.Uniform,
+                Data = Geometry.Parse(geometry),
+                StrokeThickness = 1.8, StrokeLineJoin = PenLineJoin.Round,
+                StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round,
+                Stroke = (Brush)FindResource(gradient), VerticalAlignment = VerticalAlignment.Center
+            });
+            title.Children.Add(new TextBlock
+            {
+                Text = L10n.T("tweak.cat." + category), FontWeight = FontWeights.SemiBold, FontSize = 14,
+                Margin = new Thickness(10, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center
+            });
+            title.Children.Add(new Border
+            {
+                CornerRadius = new CornerRadius(9), Padding = new Thickness(8, 2, 8, 2),
+                Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center,
+                Child = CreateBadgeText(group.Count.ToString())
+            });
+            var selectAll = new CheckBox
+            {
+                Content = L10n.T("tweaks.selectAll"), FontSize = 12,
+                VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 4, 0)
+            };
+            selectAll.Click += (_, args) =>
+            {
+                args.Handled = true;
+                var supported = _items.Where(i => i.Category == category && i.IsSupported).ToList();
+                SetCategorySelection(category, supported.Any(i => !i.IsSelected));
+            };
+            Grid.SetColumn(title, 0);
+            Grid.SetColumn(selectAll, 1);
+            header.Children.Add(title);
+            header.Children.Add(selectAll);
+            _selectAllBoxes[category] = selectAll;
+
+            var expander = new Expander
+            {
+                Header = header,
+                Content = new ItemsControl { ItemsSource = group, ItemTemplate = template },
+                Margin = new Thickness(0, 0, 0, 10),
+                HorizontalContentAlignment = HorizontalAlignment.Stretch
+            };
+            expander.Expanded += (_, _) => _expanded[category] = true;
+            expander.Collapsed += (_, _) => _expanded[category] = false;
+            expander.IsExpanded = !_expanded.TryGetValue(category, out var open) || open;
+            PanelGroups.Children.Add(expander);
         }
+        UpdateSelectionUi();
     }
 
-    private void AddChip(string text, string? category)
+    private TextBlock CreateBadgeText(string text)
     {
-        var chip = new Button
+        var block = new TextBlock { Text = text, FontSize = 11 };
+        block.SetResourceReference(TextBlock.ForegroundProperty, "Brush.TextSecondary");
+        return block;
+    }
+
+    private void SetCategorySelection(string category, bool selected)
+    {
+        _updatingSelection = true;
+        foreach (var item in _items.Where(i => i.Category == category && i.IsSupported))
+            item.IsSelected = selected;
+        _updatingSelection = false;
+        UpdateSelectionUi();
+    }
+
+    private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TweakVm.IsSelected) && !_updatingSelection) UpdateSelectionUi();
+    }
+
+    private void UpdateSelectionUi()
+    {
+        TxtSelected.Text = L10n.T("tweaks.selected", _items.Count(i => i.IsSelected));
+        foreach (var (category, box) in _selectAllBoxes)
         {
-            Content = text,
-            Tag = category,
-            Margin = new Thickness(0, 0, 8, 8)
-        };
-        if (category == _filter) chip.Style = (Style)FindResource("PrimaryButton");
-        chip.Click += Chip_Click;
-        PanelCategories.Children.Add(chip);
-    }
-
-    private void Chip_Click(object sender, RoutedEventArgs e)
-    {
-        _filter = (string?)((Button)sender).Tag;
-        BuildChips();
-        ApplyView();
-    }
-
-    private void ApplyView()
-    {
-        var view = (ListCollectionView)CollectionViewSource.GetDefaultView(_items);
-        view.GroupDescriptions.Clear();
-        if (_filter == null)
-            view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(TweakVm.CategoryName)));
-        view.Filter = _filter == null ? null : new Predicate<object>(o => ((TweakVm)o).Category == _filter);
-        ItemsTweaks.ItemsSource = view;
+            var supported = _items.Where(i => i.Category == category && i.IsSupported).ToList();
+            box.IsChecked = supported.Count > 0 && supported.All(i => i.IsSelected);
+        }
     }
 
     private async Task RefreshStatusesAsync()
@@ -238,7 +304,7 @@ public partial class TweaksTab : UserControl
     {
         _busy = busy;
         BtnApply.IsEnabled = BtnUndo.IsEnabled = BtnRestoreBackup.IsEnabled = !busy;
-        BtnRefresh.IsEnabled = BtnRestorePoint.IsEnabled = ItemsTweaks.IsEnabled = PanelCategories.IsEnabled = !busy;
+        BtnRefresh.IsEnabled = BtnRestorePoint.IsEnabled = PanelGroups.IsEnabled = !busy;
     }
 
     private async void BtnRefresh_Click(object sender, RoutedEventArgs e)

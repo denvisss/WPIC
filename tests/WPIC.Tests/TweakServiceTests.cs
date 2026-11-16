@@ -202,21 +202,39 @@ public sealed class TweakServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CatalogHasTwentyTweaksAndCorrectOsBranches()
+    public async Task CatalogHasThirtyEightTweaksAndCorrectOsBranches()
     {
         var catalog = await ConfigService.LoadTweaksAsync();
-        Assert.Equal(20, catalog.Tweaks.Count);
-        Assert.Equal(20, catalog.Tweaks.Select(t => t.Id).Distinct().Count());
+        Assert.Equal(38, catalog.Tweaks.Count);
+        Assert.Equal(38, catalog.Tweaks.Select(t => t.Id).Distinct().Count());
+        var categories = new[] { "explorer", "start", "privacy", "gaming", "system" };
+        Assert.All(catalog.Tweaks, t => Assert.Contains(t.Category, categories));
+        Assert.All(catalog.Tweaks, t => Assert.Contains(t.Risk, new[] { "green", "yellow", "red" }));
+        Assert.Equal(4, catalog.Tweaks.Count(t => t.Category == "gaming"));
         var widgets = catalog.Tweaks.Single(t => t.Id == "hide-taskbar-widgets");
         Assert.Equal("ShellFeedsTaskbarViewMode", Assert.Single(TweakService.ActionsForBuild(widgets, 19045)).ValueName);
         Assert.Equal("TaskbarDa", Assert.Single(TweakService.ActionsForBuild(widgets, 22000)).ValueName);
         Assert.False(TweakService.IsSupported(widgets, 17763, "Professional"));
+        var widgetsPolicy = catalog.Tweaks.Single(t => t.Id == "disable-widgets");
+        Assert.True(TweakService.IsSupported(widgetsPolicy, 19045, "Professional"));
+        var hags = catalog.Tweaks.Single(t => t.Id == "enable-hags");
+        Assert.False(TweakService.IsSupported(hags, 17763, "Professional"));
+        Assert.True(TweakService.IsSupported(hags, 19045, "Professional"));
+        Assert.Equal("HwSchMode", hags.Actions.Single().ValueName);
+        var recall = catalog.Tweaks.Single(t => t.Id == "disable-recall");
+        Assert.False(TweakService.IsSupported(recall, 22000, "Professional"));
+        Assert.True(TweakService.IsSupported(recall, 26100, "Professional"));
         var delivery = catalog.Tweaks.Single(t => t.Id == "disable-delivery-peering");
         Assert.False(TweakService.IsSupported(delivery, 26200, "Core"));
         Assert.True(TweakService.IsSupported(delivery, 19045, "Professional"));
         Assert.Equal("0", Assert.Single(delivery.Actions).Value);
-        foreach (var tweak in catalog.Tweaks.Skip(8))
-            Assert.DoesNotContain(tweak.Actions, a => a.Type == "command");
+        var commandIds = catalog.Tweaks.Where(t => t.Actions.Any(a => a.Type == "command")).Select(t => t.Id).ToHashSet();
+        Assert.Equal(new HashSet<string> { "disable-telemetry", "show-file-extensions", "show-hidden-files", "disable-hibernation", "classic-context-menu", "fast-folder-opening", "ultimate-performance", "disable-reserved-storage" }, commandIds);
+        var ultimate = catalog.Tweaks.Single(t => t.Id == "ultimate-performance");
+        Assert.All(ultimate.Actions, a => Assert.False(string.IsNullOrWhiteSpace(a.UndoCommand)));
+        var classic = catalog.Tweaks.Single(t => t.Id == "classic-context-menu");
+        Assert.Equal("", classic.Actions.First(a => a.Type == "registry").ValueName);
+        Assert.All(catalog.Tweaks, t => Assert.All(t.Actions.Where(a => a.Type == "command"), a => Assert.False(string.IsNullOrWhiteSpace(a.UndoCommand))));
         var english = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Resources", "strings.en.json")))!;
         foreach (var tweak in catalog.Tweaks)
         {

@@ -27,7 +27,7 @@ WPIC is a WPF desktop utility for the first minutes after a clean Windows instal
 - 📦 **Offline winget** — signed `AppInstaller` / `VCLibs` / `UI.Xaml` bundles embedded in the executable; no internet needed to get winget itself.
 - 🗂 **App catalog** — 49 apps in 7 sections with RU/EN descriptions and live version badges refreshed from winget at every startup; multi-select + batch install.
 - 🔍 **winget search** — search the whole winget repository and install anything from it.
-- 🛠 **20 system tweaks** — grouped by category, risk-marked, snapshotted before apply, one-click undo.
+- 🛠 **38 system tweaks** — collapsible icon categories with select-all, risk marks, snapshot before apply, one-click undo.
 - 🧹 **Built-in app removal** — curated catalog of Windows UWP apps with icons, install dates, name search and per-app removal risk; verified removal for the current user, optional provisioned cleanup, restore from the built-in Windows image.
 - ⬆️ **Self-update** — checks GitHub releases at startup (red dot on the settings gear); updates in place from Settings.
 - 💬 **Feedback** — "Contact the developer" opens the repository Discussions.
@@ -113,7 +113,9 @@ Seven sections: **System** (VC++ 2005–2022 bundle, DirectX, .NET Framework 3.5
 
 ## 🛠 System tweaks
 
-20 tweaks in four categories (Explorer; taskbar & Start; privacy; system), filterable by chips. Each row shows a risk dot and a live status; unavailable tweaks (build/edition limits) cannot be selected.
+38 tweaks in five collapsible categories, each with its own icon: Explorer; taskbar & Start; privacy; gaming & performance; system. Every header carries a *Select all* checkbox and a tweak counter, the toolbar shows the total selection and applies everything with one button. Each row shows a risk dot and a live status; unavailable tweaks (build/edition limits) cannot be selected.
+
+Highlights: hardware-accelerated GPU scheduling (HAGS), GameDVR off + Game Mode, network throttling off, Ultimate Performance power plan, Recall / Copilot / activity history / Spotlight / Widgets policies, classic Win10 context menu, End task on the taskbar, tray clock seconds, faster folder opening, uncompressed wallpapers, NumLock on sign-in, larger icon cache, service host split threshold, reserved storage off.
 
 Before applying, registry values and system parameters are snapshotted to `%LOCALAPPDATA%\WPIC\backup\<date>\registry-backup.json`; a failed backup aborts the apply. Undo restores the pre-first-apply originals from `%LOCALAPPDATA%\WPIC\tweak-originals.json` (survives re-apply and restarts). Defaults are never guessed when no original exists; `command`-type tweaks are not reverted by restore.
 
@@ -145,7 +147,7 @@ WPIC checks GitHub releases once at startup. If a newer release exists, a red do
 
 `wingetIds` lists all packages of a multi-package entry; `windowsFeature` enables a Windows component via DISM after install. Find ids with `winget search "name"`.
 
-**Tweaks** — edit `configs/tweaks.json` (`category`: `explorer`, `start`, `privacy`, `system`). Three action types:
+**Tweaks** — edit `configs/tweaks.json` (`category`: `explorer`, `start`, `privacy`, `gaming`, `system`). Three action types:
 
 - `registry` — writes a registry value; missing keys are created, the original value and its real type are saved automatically;
 - `systemParameter` — `animations`, `stickyKeysHotkey` or `filterKeysHotkey` via the Windows API;
@@ -201,7 +203,7 @@ Copy-Item build\prune\payload\DriverPack\WPIC-Drivers.7z build\payload\DriverPac
 
 ## ✅ Verification
 
-126 xUnit tests (catalog contract, winget table parsing, tweak engine, driver index, localization) plus offscreen WPF UI harnesses that exercise the real views: catalog rendering/selection/batch button, tweak apply/undo against an isolated registry key, winget banner states and pack drag & drop.
+157 xUnit tests (catalog contract, winget table parsing, tweak engine, driver index, localization) plus offscreen WPF UI harnesses that exercise the real views: catalog rendering/selection/batch button, tweak category expanders/select-all/apply/undo against an isolated registry key, winget banner states and pack drag & drop.
 
 ## 📜 Licenses
 
@@ -230,7 +232,7 @@ WPIC — утилита (WPF, .NET 8) для первых минут после 
 - 📦 **Офлайн-winget** — подписанные `AppInstaller` / `VCLibs` / `UI.Xaml` встроены в exe.
 - 🗂 **Каталог** — 49 приложений в 7 разделах, описания RU/EN и бейджи версий, обновляемые из winget при каждом запуске; выбор галочками и пакетная установка.
 - 🔍 **Поиск в winget** — установка любых пакетов репозитория.
-- 🛠 **20 твиков** — категории, отметки риска, снимок значений до применения, откат одной кнопкой.
+- 🛠 **38 твиков** — раскрываемые категории с иконками, «выбрать все», отметки риска, снимок значений до применения, откат одной кнопкой.
 - 🧹 **Удаление встроенных приложений** — курируемый каталог UWP-приложений Windows с иконками, датами установки, поиском и отметкой риска удаления; проверенное удаление для текущего пользователя, опциональная чистка provisioned, восстановление из встроенного образа Windows.
 - ⬆️ **Самообновление** — проверка релизов GitHub при запуске (красная точка на шестерёнке настроек); обновление поверх текущей версии из настроек.
 - 💬 **Обратная связь** — «Написать разработчику» открывает Discussions репозитория.
@@ -318,7 +320,9 @@ Zip-варианты содержат тот же exe, что и одноимё�
 
 ## 🛠 Твики системы
 
-20 твиков в четырёх категориях (Проводник; панель задач и меню Пуск; приватность; система), чипы-фильтры над списком. У каждой строки — точка риска и живой статус; недоступные твики (ограничения сборки/редакции) выбрать нельзя.
+38 твиков в пяти раскрываемых категориях, у каждой своя иконка: Проводник; панель задач и меню Пуск; приватность; игры и производительность; система. В заголовке категории — чекбокс «Выбрать все» и счётчик твиков, на панели — общий счётчик выбора и применение одной кнопкой. У каждой строки — точка риска и живой статус; недоступные твики (ограничения сборки/редакции) выбрать нельзя.
+
+Из нового: аппаратное планирование GPU (HAGS), отключение записи игр и игровой режим, сетевой троттлинг-лимит, схема «Максимальная производительность», политики Recall / Copilot / журнала действий / Spotlight / виджетов, классическое контекстное меню Win10, «Завершить задачу» на панели задач, секунды в часах, ускорение открытия папок, сжатие обоев, NumLock при входе, кэш иконок, порог разделения служб, зарезервированное хранилище.
 
 Перед применением значения реестра и системных параметров сохраняются в `%LOCALAPPDATA%\WPIC\backup\<дата>\registry-backup.json`; ошибка копирования останавливает применение. Откат берёт исходные значения до первого применения из `%LOCALAPPDATA%\WPIC\tweak-originals.json` (переживает повторное применение и перезапуск). При отсутствии исходной копии значения по умолчанию не подставляются; восстановление не отменяет `command`-твики.
 
@@ -350,7 +354,7 @@ WPIC проверяет релизы GitHub один раз при запуск�
 
 `wingetIds` — все пакеты многопакетной записи; `windowsFeature` — компонент Windows, включаемый через DISM после установки. Id ищется командой `winget search "имя"`.
 
-**Твики** — `configs/tweaks.json` (`category`: `explorer`, `start`, `privacy`, `system`). Три вида действий:
+**Твики** — `configs/tweaks.json` (`category`: `explorer`, `start`, `privacy`, `gaming`, `system`). Три вида действий:
 
 - `registry` — запись значения в реестр; отсутствующий ключ создаётся, исходное значение и его фактический тип сохраняются автоматически;
 - `systemParameter` — `animations`, `stickyKeysHotkey` или `filterKeysHotkey` через API Windows;
@@ -406,7 +410,7 @@ Copy-Item build\prune\payload\DriverPack\WPIC-Drivers.7z build\payload\DriverPac
 
 ## ✅ Проверка
 
-126 тестов xUnit (контракт каталога, парсинг таблиц winget, движок твиков, индекс драйверов, локализация) плюс офскрин-харнесы WPF на реальных вкладках: рендеринг/выбор/пакетная кнопка каталога, применение и откат твиков на изолированном ключе реестра, состояния баннера winget и drag & drop пака.
+157 тестов xUnit (контракт каталога, парсинг таблиц winget, движок твиков, индекс драйверов, локализация) плюс офскрин-харнесы WPF на реальных вкладках: рендеринг/выбор/пакетная кнопка каталога, категории-раскрывашки твиков, «выбрать все», применение и откат на изолированном ключе реестра, состояния баннера winget и drag & drop пака.
 
 ## 📜 Лицензии
 

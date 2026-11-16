@@ -308,6 +308,229 @@
         { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings", "valueName": "NOC_GLOBAL_SETTING_ALLOW_TOASTS_ABOVE_LOCK", "value": "0" },
         { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications", "valueName": "LockScreenToastEnabled", "value": "0" }
       ]
+    },
+    {
+      "id": "enable-hags",
+      "category": "gaming",
+      "name": "Включить аппаратное планирование GPU (HAGS)",
+      "description": "Видеокарта сама управляет очередями кадров, что снижает задержку и нагрузку на процессор. Работает не на всех видеокартах и драйверах — при артефактах отключите твик. Применяется после перезагрузки.",
+      "risk": "yellow",
+      "minBuild": 19041,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers", "valueName": "HwSchMode", "regType": "DWord", "value": "2" }
+      ]
+    },
+    {
+      "id": "disable-gamedvr",
+      "category": "gaming",
+      "name": "Отключить запись игр и включить игровой режим",
+      "description": "Убирает фоновую запись и захват игр (GameDVR), вызывающий микрофризы, и включает игровой режим Windows. Запись через клавишу Win+G перестанет работать.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKCU\\System\\GameConfigStore", "valueName": "GameDVR_Enabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR", "valueName": "AppCaptureEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR", "valueName": "AllowGameDVR", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\GameBar", "valueName": "AutoGameModeEnabled", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-network-throttling",
+      "category": "gaming",
+      "name": "Отключить сетевое троттлинг-ограничение",
+      "description": "Система перестаёт урезать сетевой трафик мультимедийных приложений до 10 пакетов в миллисекунду — ниже пинг и джиттер в онлайн-играх. Применяется к новым процессам.",
+      "risk": "yellow",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile", "valueName": "NetworkThrottlingIndex", "regType": "DWord", "value": "0xffffffff" }
+      ]
+    },
+    {
+      "id": "ultimate-performance",
+      "category": "gaming",
+      "name": "Схема питания «Максимальная производительность»",
+      "description": "Создаёт копию скрытого плана Ultimate Performance и активирует его: процессор не сбрасывает частоты в простое. Повышает энергопотребление. Откат возвращает схему «Сбалансированная».",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "command",
+          "command": "for /f \"tokens=4\" %G in ('powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61') do powercfg -setactive %G",
+          "undoCommand": "powercfg -setactive 381b4222-f694-41f0-9685-ff5bb260df2e"
+        }
+      ]
+    },
+    {
+      "id": "disable-copilot",
+      "category": "privacy",
+      "name": "Отключить Copilot и его клавишу",
+      "description": "Скрывает помощника Copilot из системы и отвязывает аппаратную клавишу Copilot на клавиатуре.",
+      "risk": "green",
+      "minBuild": 22621,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot", "valueName": "TurnOffWindowsCopilot", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-recall",
+      "category": "privacy",
+      "name": "Отключить Recall (снимки экрана для ИИ)",
+      "description": "Запрещает фоновые снимки экрана и их семантический анализ функцией Recall. Только Windows 11 24H2 и новее.",
+      "risk": "yellow",
+      "minBuild": 26100,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Policies\\Microsoft\\Windows\\WindowsAI", "valueName": "DisableAIDataAnalysis", "regType": "DWord", "value": "1" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI", "valueName": "DisableAIDataAnalysis", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-activity-history",
+      "category": "privacy",
+      "name": "Отключить журнал действий",
+      "description": "Windows перестаёт вести хронологию запуска программ и публиковать её в облако. Уже собранная история не удаляется — её можно очистить в параметрах конфиденциальности.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "valueName": "EnableActivityFeed", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "valueName": "PublishUserActivities", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "valueName": "UploadUserActivities", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-spotlight",
+      "category": "privacy",
+      "name": "Отключить Windows Spotlight на экране блокировки",
+      "description": "Экран блокировки перестанет показывать ежедневные снимки Spotlight и рекламные советы — обои останутся статичными.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "valueName": "RotatingLockScreenEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "valueName": "RotatingLockScreenOverlayEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "valueName": "SubscribedContent-338387Enabled", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-widgets",
+      "category": "privacy",
+      "name": "Отключить виджеты полностью",
+      "description": "Выключает службу виджетов политикой — кнопка исчезнет даже если она включена вручную. В отличие от твика «Скрыть виджеты», компонент перестаёт работать в фоне.",
+      "risk": "green",
+      "minBuild": 19045,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Dsh", "valueName": "AllowNewsAndInterests", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "classic-context-menu",
+      "category": "start",
+      "name": "Классическое контекстное меню",
+      "description": "Возвращает привычное меню правого клика в стиле Windows 10: «Показать ещё параметры» больше не нужно. Только Windows 11.",
+      "risk": "green",
+      "minBuild": 22000,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "valueName": "", "regType": "String", "value": "" },
+        {
+          "type": "command",
+          "command": "taskkill /f /im explorer.exe && start explorer.exe",
+          "undoCommand": "reg delete \"HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\" /f & taskkill /f /im explorer.exe && start explorer.exe"
+        }
+      ]
+    },
+    {
+      "id": "taskbar-end-task",
+      "category": "start",
+      "name": "Пункт «Завершить задачу» на панели задач",
+      "description": "Правый клик по приложению на панели задач получает пункт немедленного завершения зависшего процесса. Windows 11 23H2 и новее.",
+      "risk": "green",
+      "minBuild": 22631,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "TaskbarEndTask", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "tray-clock-seconds",
+      "category": "start",
+      "name": "Показывать секунды в часах",
+      "description": "Часы в трее показывают секунды. Незначительно повышает нагрузку на процессор.",
+      "risk": "green",
+      "minBuild": 18362,
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "ShowSecondsInSystemClock", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "fast-folder-opening",
+      "category": "explorer",
+      "name": "Ускорить открытие папок",
+      "description": "Проводник перестаёт при первом открытии определять тип содержимого папки и сразу показывает файлы. Требует перезапуска Проводника — выполняется автоматически.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags\\AllFolders\\Shell", "valueName": "FolderType", "regType": "String", "value": "NotSpecified" },
+        {
+          "type": "command",
+          "command": "taskkill /f /im explorer.exe && start explorer.exe",
+          "undoCommand": "taskkill /f /im explorer.exe && start explorer.exe"
+        }
+      ]
+    },
+    {
+      "id": "wallpaper-quality",
+      "category": "explorer",
+      "name": "Отключить сжатие обоев",
+      "description": "Обои больше не пережимаются в JPEG с потерей качества при установке. Действует на обои, установленные после применения твика.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Control Panel\\Desktop", "valueName": "JPEGImportQuality", "regType": "DWord", "value": "100" }
+      ]
+    },
+    {
+      "id": "numlock-on-boot",
+      "category": "system",
+      "name": "Включать NumLock при входе в систему",
+      "description": "Цифровая часть клавиатуры включается автоматически при входе в Windows.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Control Panel\\Keyboard", "valueName": "InitialKeyboardIndicators", "regType": "String", "value": "2" }
+      ]
+    },
+    {
+      "id": "increase-icon-cache",
+      "category": "system",
+      "name": "Увеличить кэш иконок",
+      "description": "Увеличивает кэш значков Проводника до 4096 — иконки меньше мерцают и не подгружаются заново.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer", "valueName": "Max Cached Icons", "regType": "String", "value": "4096" }
+      ]
+    },
+    {
+      "id": "svchost-split-threshold",
+      "category": "system",
+      "name": "Отключить разделение процессов служб",
+      "description": "Службы с общим хостом перестают дробиться на отдельные процессы: меньше процессов и потребление ОЗУ, но снижается изоляция служб. Применяется после перезагрузки.",
+      "risk": "yellow",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SYSTEM\\CurrentControlSet\\Control", "valueName": "SvcHostSplitThresholdInKB", "regType": "DWord", "value": "0x1000000" }
+      ]
+    },
+    {
+      "id": "disable-reserved-storage",
+      "category": "system",
+      "name": "Отключить зарезервированное хранилище",
+      "description": "Освобождает около 7 ГБ, которые Windows держит для беспроблемных обновлений. Обновления продолжат работать. Если хранилище уже отключено, DISM сообщит об ошибке.",
+      "risk": "yellow",
+      "minBuild": 18362,
+      "actions": [
+        {
+          "type": "command",
+          "command": "Dism /Online /Set-ReservedStorageState /State:Disabled",
+          "undoCommand": "Dism /Online /Set-ReservedStorageState /State:Enabled"
+        }
+      ]
     }
   ]
 }
