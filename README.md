@@ -6,7 +6,8 @@
 
 **One tool to bring a freshly installed Windows 10/11 back to life — even with no network at all.**
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](#-releases)
+[![Release](https://img.shields.io/github/v/release/denvisss/WPIC?label=release&sort=semver)](https://github.com/denvisss/WPIC/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/denvisss/WPIC/total?label=downloads)](https://github.com/denvisss/WPIC/releases)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](#-building-from-source)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D6?logo=windows&logoColor=white)](#-requirements)
 [![Tests](https://img.shields.io/badge/tests-126%20passing-2ea44f)](#-verification)
@@ -38,7 +39,7 @@ WPIC is a WPF desktop utility for the first minutes after a clean Windows instal
 
 ## 📥 Releases
 
-Version **0.2.0** ships four artifacts; every file has a `.sha256` sidecar next to it.
+Version **0.2.0** ships four artifacts; every file has a `.sha256` sidecar next to it. Download from [GitHub Releases](https://github.com/denvisss/WPIC/releases/latest).
 
 | File | Size | What it is |
 |---|---|---|
@@ -227,7 +228,7 @@ WPIC — утилита (WPF, .NET 8) для первых минут после 
 
 ## 📥 Выпуски
 
-Версия **0.2.0**, четыре артефакта, у каждого файл `.sha256`:
+Версия **0.2.0**, четыре артефакта, у каждого файл `.sha256`. Скачивание: [GitHub Releases](https://github.com/denvisss/WPIC/releases/latest).
 
 | Файл | Размер | Содержимое |
 |---|---|---|
