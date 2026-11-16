@@ -121,8 +121,21 @@ public class L10nExtension : MarkupExtension
             PropertyChangedEventHandler? handler = null;
             handler = (_, _) =>
             {
-                if (weak.Target is DependencyObject alive) alive.SetValue(dp, L10n.Instance[Key]);
-                else L10n.Instance.PropertyChanged -= handler;
+                if (weak.Target is not DependencyObject alive)
+                {
+                    L10n.Instance.PropertyChanged -= handler;
+                    return;
+                }
+                // Смена языка может прийти с чужого потока (тесты, фоновые задачи):
+                // DependencyObject принадлежит потоку своего Dispatcher.
+                var dispatcher = alive.Dispatcher;
+                if (dispatcher.HasShutdownFinished)
+                {
+                    L10n.Instance.PropertyChanged -= handler;
+                    return;
+                }
+                if (dispatcher.CheckAccess()) alive.SetValue(dp, L10n.Instance[Key]);
+                else dispatcher.BeginInvoke(() => alive.SetValue(dp, L10n.Instance[Key]));
             };
             L10n.Instance.PropertyChanged += handler;
         }
