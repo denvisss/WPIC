@@ -1,6 +1,6 @@
 ﻿; Установщик «один файл»: приложение + офлайн-набор драйверов + офлайн-winget.
 #define AppName "Windows Post-Install Client"
-#define AppVersion "0.3.0"
+#define AppVersion "1.1.0"
 #define AppPublisher "denvisss"
 #define AppExeName "WindowsPostInstallClient.exe"
 #define PublishDir SourcePath + "publish"

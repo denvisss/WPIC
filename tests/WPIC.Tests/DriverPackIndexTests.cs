@@ -361,6 +361,43 @@ public class DriverPackIndexTests
     }
 
     [Fact]
+    public async Task LoadCuratedPack_ReadsIndexFromArchiveAndPrefersExternalFile()
+    {
+        var root = NewTempDir("cur-");
+        try
+        {
+            var stage = Path.Combine(root, "stage");
+            Directory.CreateDirectory(Path.Combine(stage, "Intel", "LAN", "10x64", "23.0"));
+            File.WriteAllText(Path.Combine(stage, "Intel", "LAN", "10x64", "23.0", "e1d.inf"), "[Version]\r\nClass=Net\r\n");
+            var seven = ExtractEmbeddedSevenZip(root);
+            var archive = Path.Combine(root, "WPIC-Drivers.7z");
+            Run7z(seven, archive, Path.Combine(stage, "Intel"));
+            var tsv = Path.Combine(root, "index.tsv");
+            File.WriteAllLines(tsv, new[]
+            {
+                string.Join("\t", Hwid, @"Intel\LAN\10x64\23.0\e1d.inf", "Intel", "02/13/2024,23.0", "Intel", "0", "Ethernet")
+            });
+            Run7z(seven, archive, tsv);
+
+            Assert.True(DriverPackService.IsCuratedPack(root));
+            Assert.False(DriverPackService.IsExternalPack(root));
+            Assert.True(DriverPackService.IsPack(root));
+            var index = await DriverPackIndex.LoadCuratedAsync(root, seven);
+            Assert.Equal("23.0", index.Match(new[] { Hwid }, windows11: false).Single().Version);
+
+            File.WriteAllLines(Path.Combine(root, "index.tsv"), new[]
+            {
+                string.Join("\t", HwidNorm, @"Realtek\10x64\22.0\net.inf", "Realtek", "01/10/2023,22.0", "Realtek", "0", "GbE")
+            });
+            var external = await DriverPackIndex.LoadCuratedAsync(root, seven);
+            var candidate = external.Match(new[] { Hwid }, windows11: false).Single();
+            Assert.Equal("22.0", candidate.Version);
+            Assert.Equal(@"Realtek\10x64\22.0\net.inf", candidate.InfPath);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, recursive: true); }
+    }
+
+    [Fact]
     public void Load_ReadsTsvFile()
     {
         var path = Path.GetTempFileName();

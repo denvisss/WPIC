@@ -2,7 +2,7 @@ param([string]$Iscc = '')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $pack = Join-Path $PSScriptRoot 'payload\DriverPack'
-foreach ($name in @('WPIC-Drivers.7z', 'index.tsv', 'pack.version', '7za64.exe')) {
+foreach ($name in @('WPIC-Drivers.7z', '7za64.exe')) {
     if (-not (Test-Path (Join-Path $pack $name))) { throw "Missing driver payload: $name" }
 }
 $winget = Join-Path $PSScriptRoot 'payload\winget'

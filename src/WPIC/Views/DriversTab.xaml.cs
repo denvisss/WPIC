@@ -80,7 +80,11 @@ public partial class DriversTab : UserControl
     private async Task<DriverPackIndex> LoadIndexAsync(string dir)
     {
         if (DriverPackService.IsCuratedPack(dir))
-            return await Task.Run(() => DriverPackIndex.Load(System.IO.Path.Combine(dir, "index.tsv")));
+        {
+            TxtPackStatus.Text = L10n.T("drivers.offline.loadingPack");
+            return await DriverPackIndex.LoadCuratedAsync(dir, DriverPackService.FindExtractor(),
+                new Progress<string>(LogService.Log));
+        }
         TxtPackStatus.Text = L10n.T("drivers.offline.loadingPack");
         return await DriverPackIndex.LoadExternalAsync(dir, DriverPackService.FindExtractor(),
             new Progress<string>(LogService.Log));

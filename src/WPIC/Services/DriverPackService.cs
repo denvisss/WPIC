@@ -54,9 +54,9 @@ public static class DriverPackService
             .Where(p => p.Device.IsNetClass || p.Candidates.Count > 0)
             .ToList();
 
+    /// <summary>Курируемый пак: index.tsv рядом с архивом или внутри него.</summary>
     public static bool IsCuratedPack(string dir) =>
         Directory.Exists(dir) &&
-        File.Exists(Path.Combine(dir, "index.tsv")) &&
         File.Exists(Path.Combine(dir, "WPIC-Drivers.7z"));
 
     /// <summary>Внешний пак драйверов: Drivers\*.7z + Index\DIA\*.txt (любой совместимый пак).</summary>

@@ -98,6 +98,29 @@ public sealed class DriverPackIndex
         return index;
     }
 
+    /// <summary>Курируемый пак: index.tsv лежит рядом с WPIC-Drivers.7z или внутри архива.</summary>
+    public static async Task<DriverPackIndex> LoadCuratedAsync(
+        string dir, string sevenZip, IProgress<string>? log = null, CancellationToken ct = default)
+    {
+        var archive = Path.Combine(dir, "WPIC-Drivers.7z");
+        if (!File.Exists(archive)) throw new FileNotFoundException(L10n.T("drivers.offline.packInvalid"));
+        var external = Path.Combine(dir, "index.tsv");
+        var index = new DriverPackIndex();
+        var added = 0;
+        IEnumerable<string> lines = File.Exists(external)
+            ? File.ReadLines(external)
+            : await ReadEntryLinesAsync(sevenZip, new[] { "e", "-y", "-so", archive, "index.tsv" }, null, ct);
+        foreach (var line in lines)
+        {
+            var row = DriverRow.TryParse(line);
+            if (row == null) continue;
+            index.Add(row);
+            added++;
+        }
+        log?.Report(L10n.T("drivers.offline.indexPack", "WPIC-Drivers", added));
+        return index;
+    }
+
     /// <summary>Индекс из внешнего пака драйверов (Drivers\*.7z + Index\DIA\*.txt).
     /// Путь INF получает префикс имени пака для маршрутизации извлечения; остаются только новейшие версии.</summary>
     public static async Task<DriverPackIndex> LoadExternalAsync(
@@ -130,7 +153,10 @@ public sealed class DriverPackIndex
     }
 
     /// <summary>DIA-индекс внешнего пака хранится как 7z-сжатый TSV; при неудаче читается как обычный текст.</summary>
-    private static async Task<List<string>> ReadIndexLinesAsync(string sevenZip, string dia, CancellationToken ct)
+    private static async Task<List<string>> ReadIndexLinesAsync(string sevenZip, string dia, CancellationToken ct) =>
+        await ReadEntryLinesAsync(sevenZip, new[] { "e", "-y", "-so", dia }, dia, ct);
+
+    private static async Task<List<string>> ReadEntryLinesAsync(string sevenZip, string[] args, string? fallbackFile, CancellationToken ct)
     {
         var psi = new System.Diagnostics.ProcessStartInfo(sevenZip)
         {
@@ -138,7 +164,7 @@ public sealed class DriverPackIndex
             UseShellExecute = false, CreateNoWindow = true,
             StandardOutputEncoding = System.Text.Encoding.UTF8
         };
-        psi.ArgumentList.Add("e"); psi.ArgumentList.Add("-y"); psi.ArgumentList.Add("-so"); psi.ArgumentList.Add(dia);
+        foreach (var argument in args) psi.ArgumentList.Add(argument);
         using var process = System.Diagnostics.Process.Start(psi)
                             ?? throw new InvalidOperationException(L10n.T("drivers.err.title"));
         var read = process.StandardOutput.ReadToEndAsync(ct);
@@ -148,7 +174,8 @@ public sealed class DriverPackIndex
         if (process.ExitCode != 0 || text.Length == 0)
         {
             await error;
-            try { text = await File.ReadAllTextAsync(dia, ct); }
+            if (fallbackFile == null) return new List<string>();
+            try { text = await File.ReadAllTextAsync(fallbackFile, ct); }
             catch { return new List<string>(); }
         }
         return text.Split('\n').Select(l => l.TrimEnd('\r')).Where(l => l.Length > 0).ToList();
