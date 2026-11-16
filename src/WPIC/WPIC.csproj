@@ -11,7 +11,7 @@
     <ApplicationManifest Condition="'$(Configuration)' == 'Debug'">app.debug.manifest</ApplicationManifest>
     <RootNamespace>WPIC</RootNamespace>
     <AssemblyName>WindowsPostInstallClient</AssemblyName>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Product>Windows Post-Install Client</Product>
     <AssemblyTitle>Windows Post-Install Client</AssemblyTitle>
     <Description>Установка приложений, драйверов и твиков после чистой установки Windows</Description>

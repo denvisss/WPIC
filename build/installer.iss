@@ -1,6 +1,6 @@
-; Установщик «один файл»: приложение + офлайн-набор драйверов + офлайн-winget.
+﻿; Установщик «один файл»: приложение + офлайн-набор драйверов + офлайн-winget.
 #define AppName "Windows Post-Install Client"
-#define AppVersion "0.2.0"
+#define AppVersion "0.3.0"
 #define AppPublisher "denvisss"
 #define AppExeName "WindowsPostInstallClient.exe"
 #define PublishDir SourcePath + "publish"
@@ -38,11 +38,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs
 Source: "{#PayloadDir}\DriverPack\7za64.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#PayloadDir}\DriverPack\*"; DestDir: "{app}\DriverPack"; Flags: ignoreversion recursesubdirs
-Source: "{#PayloadDir}\winget\*"; DestDir: "{app}\winget"; Flags: ignoreversion recursesubdirs
+; winget-пак не кладём рядом с exe: он встроен в ресурсы exe и распаковывается
+; в %LOCALAPPDATA%\WPIC\winget при первом обращении (как в portable) — без дубликата ~69 МиБ.
 
 [InstallDelete]
 ; старое имя сборки до переименования приложения
 Type: files; Name: "{app}\WindowsInstallClient.exe"
+; loose-копия winget-пака из установщиков 0.2.0 и раньше
+Type: filesandordirs; Name: "{app}\winget"
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"

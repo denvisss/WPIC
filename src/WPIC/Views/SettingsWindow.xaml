@@ -4,21 +4,53 @@
         xmlns:loc="clr-namespace:WPIC.Services"
         Title="{loc:L10n settings.title}"
         Style="{DynamicResource {x:Type Window}}"
-        Width="420" SizeToContent="Height"
+        Width="440" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize" ShowInTaskbar="False">
     <StackPanel Margin="18,16,18,16">
         <TextBlock Text="{loc:L10n settings.theme}" FontSize="14" FontWeight="SemiBold"/>
-        <RadioButton x:Name="OptSystem" GroupName="theme" Content="{loc:L10n settings.theme.system}" Margin="0,12,0,0"/>
-        <RadioButton x:Name="OptLight" GroupName="theme" Content="{loc:L10n settings.theme.light}" Margin="0,8,0,0"/>
-        <RadioButton x:Name="OptDark" GroupName="theme" Content="{loc:L10n settings.theme.dark}" Margin="0,8,0,0"/>
+        <ComboBox x:Name="CmbTheme" Margin="0,8,0,0">
+            <ComboBoxItem Content="{loc:L10n settings.theme.system}"/>
+            <ComboBoxItem Content="{loc:L10n settings.theme.light}"/>
+            <ComboBoxItem Content="{loc:L10n settings.theme.dark}"/>
+        </ComboBox>
 
-        <TextBlock Text="{loc:L10n settings.lang}" FontSize="14" FontWeight="SemiBold" Margin="0,18,0,0"/>
-        <RadioButton x:Name="OptLangSystem" GroupName="lang" Content="{loc:L10n settings.lang.system}" Margin="0,12,0,0"/>
-        <RadioButton x:Name="OptLangRu" GroupName="lang" Content="{loc:L10n settings.lang.ru}" Margin="0,8,0,0"/>
-        <RadioButton x:Name="OptLangEn" GroupName="lang" Content="{loc:L10n settings.lang.en}" Margin="0,8,0,0"/>
+        <TextBlock Text="{loc:L10n settings.lang}" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,0"/>
+        <ComboBox x:Name="CmbLang" Margin="0,8,0,0">
+            <ComboBoxItem Content="{loc:L10n settings.lang.system}"/>
+            <ComboBoxItem Content="{loc:L10n settings.lang.ru}"/>
+            <ComboBoxItem Content="{loc:L10n settings.lang.en}"/>
+        </ComboBox>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+        <Border Margin="0,18,0,0" Padding="12" CornerRadius="8"
+                Background="{DynamicResource Brush.FieldBg}"
+                BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
+            <StackPanel>
+                <TextBlock Text="{loc:L10n settings.update}" FontSize="14" FontWeight="SemiBold"/>
+                <TextBlock x:Name="TxtVersion" FontSize="12" Margin="0,6,0,0"
+                           Foreground="{DynamicResource Brush.TextSecondary}"/>
+                <TextBlock x:Name="TxtUpdateStatus" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Brush.Text}"/>
+                <ProgressBar x:Name="PbUpdate" Height="6" Margin="0,8,0,0" Maximum="100" Visibility="Collapsed"
+                             Foreground="{DynamicResource Brush.Accent}"
+                             Background="{DynamicResource Brush.Surface}" BorderThickness="0"/>
+                <WrapPanel Margin="0,10,0,0">
+                    <Button x:Name="BtnCheckUpdate" Content="{loc:L10n settings.update.check}" Click="BtnCheckUpdate_Click"/>
+                    <Button x:Name="BtnDoUpdate" Style="{DynamicResource PrimaryButton}" Margin="8,0,0,0"
+                            Content="{loc:L10n settings.update.do}" Visibility="Collapsed" Click="BtnDoUpdate_Click"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <Button x:Name="BtnContact" Margin="0,14,0,0" HorizontalAlignment="Left" Click="BtnContact_Click">
+            <StackPanel Orientation="Horizontal">
+                <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource Brush.Text}"
+                      Data="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                <TextBlock Text="{loc:L10n settings.contact}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Button>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
             <Button x:Name="BtnOk" Style="{DynamicResource PrimaryButton}" Content="{loc:L10n msg.ok}" Click="BtnOk_Click"/>
             <Button Content="{loc:L10n msg.cancel}" Margin="8,0,0,0" IsCancel="True"/>
         </StackPanel>

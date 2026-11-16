@@ -20,6 +20,12 @@ if (-not $Iscc) { throw 'Inno Setup 6 compiler not found; supply -Iscc' }
 
 $tests = Join-Path $root 'tests\WPIC.Tests\WPIC.Tests.csproj'
 $app = Join-Path $root 'src\WPIC\WPIC.csproj'
+$csproj = [xml](Get-Content $app -Raw)
+$version = $csproj.Project.PropertyGroup.Version
+# версия установщика всегда следует за csproj
+$iss = Join-Path $PSScriptRoot 'installer.iss'
+$issText = [regex]::Replace([IO.File]::ReadAllText($iss), '#define AppVersion "[^"]*"', "#define AppVersion `"$version`"")
+[IO.File]::WriteAllText($iss, $issText, [System.Text.UTF8Encoding]::new($true))
 & dotnet test $tests -c Release --nologo -v minimal
 if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
 
@@ -34,8 +40,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
     -o (Join-Path $PSScriptRoot 'publish-portable') --nologo -v minimal
 if ($LASTEXITCODE -ne 0) { throw 'Portable publish failed' }
 
-$csproj = [xml](Get-Content $app -Raw)
-$version = $csproj.Project.PropertyGroup.Version
 $release = Join-Path $PSScriptRoot 'release'
 New-Item -ItemType Directory -Force -Path $release | Out-Null
 Move-Item (Join-Path $PSScriptRoot "installer\WPIC_$version-full.exe") $release -Force

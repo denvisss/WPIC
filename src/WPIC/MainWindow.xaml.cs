@@ -16,6 +16,18 @@ public partial class MainWindow : Window
         LogService.Log(L10n.T("main.log.configDir", ConfigService.ConfigDirectory));
         LogService.Log(L10n.T("main.log.dataDir", LogService.DataDirectory));
         SourceInitialized += (_, _) => ThemeService.ApplyTitleBar(this, ThemeService.Resolved == ThemeService.Dark);
+        UpdateService.PendingChanged += () =>
+        {
+            if (Dispatcher.HasShutdownFinished) return;
+            Dispatcher.BeginInvoke(() =>
+                DotUpdate.Visibility = UpdateService.Pending != null ? Visibility.Visible : Visibility.Collapsed);
+        };
+        Loaded += async (_, _) =>
+        {
+            UpdateService.CleanupOldPortable();
+            // проверка обновлений только при запуске; результат — красная точка на «Настройках»
+            await UpdateService.CheckAsync();
+        };
     }
 
     private void BtnSettings_Click(object sender, RoutedEventArgs e)
@@ -51,7 +63,7 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK, MessageBoxImage.Warning, this);
             return;
         }
-        MainTabs.SelectedIndex = 2;
+        MainTabs.SelectedItem = TabDrivers.Parent;
         await TabDrivers.UsePackAsync(dir);
     }
 
