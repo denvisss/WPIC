@@ -28,6 +28,9 @@ WPIC is a WPF desktop utility for the first minutes after a clean Windows instal
 - 🗂 **App catalog** — 49 apps in 7 sections with RU/EN descriptions and live version badges refreshed from winget at every startup; multi-select + batch install.
 - 🔍 **winget search** — search the whole winget repository and install anything from it.
 - 🛠 **20 system tweaks** — grouped by category, risk-marked, snapshotted before apply, one-click undo.
+- 🧹 **Built-in app removal** — lists Windows Appx apps with their icons, install dates and per-app removal risk; remove for the current user and restore later from the built-in Windows image.
+- ⬆️ **Self-update** — checks GitHub releases at startup (red dot on the settings gear); updates in place from Settings.
+- 💬 **Feedback** — "Contact the developer" opens the repository Discussions.
 - 🌐 **Bilingual UI** — English / Russian, dark / light themes.
 - 📜 **Live log** — every operation streamed to an on-screen log and to disk.
 
@@ -36,6 +39,10 @@ WPIC is a WPF desktop utility for the first minutes after a clean Windows instal
 | App catalog (dark, EN) | Catalog, light theme |
 |---|---|
 | ![Catalog EN dark](docs/images/catalog-en.png) | ![Catalog EN light](docs/images/catalog-en-light.png) |
+
+| Built-in app removal (RU) | Settings: theme/language combos, update check |
+|---|---|
+| ![Built-in apps](docs/images/bloat-ru.png) | ![Settings](docs/images/settings-ru.png) |
 
 ## 📥 Releases
 
@@ -110,6 +117,16 @@ Seven sections: **System** (VC++ 2005–2022 bundle, DirectX, .NET Framework 3.5
 
 Before applying, registry values and system parameters are snapshotted to `%LOCALAPPDATA%\WPIC\backup\<date>\registry-backup.json`; a failed backup aborts the apply. Undo restores the pre-first-apply originals from `%LOCALAPPDATA%\WPIC\tweak-originals.json` (survives re-apply and restarts). Defaults are never guessed when no original exists; `command`-type tweaks are not reverted by restore.
 
+## 🧹 Built-in app removal
+
+The tab between *Apps* and *System tweaks* lists the built-in Windows Appx packages (main packages only) with their real icons, localized names and install dates. Every row carries a removal-risk dot — green *safe*, yellow *use with care*, red *risky* — based on a curated classification (Store, winget, Security and shell components are red; optional inbox apps are green). System packages flagged non-removable cannot be selected.
+
+Removal runs `Remove-AppxPackage` for the current user only. Apps removed via WPIC are recorded in `%LOCALAPPDATA%\WPIC\bloat-removed.json` and shown in a separate group, from where they can be re-registered from the built-in Windows image (`Add-AppxPackage -RegisterByFamilyName`). Both actions ask for confirmation with a section-specific warning; a restore point can be created from the same toolbar.
+
+## ⬆️ Updates & feedback
+
+WPIC checks GitHub releases once at startup. If a newer release exists, a red dot appears on the settings gear; *Settings → Check for updates* re-checks on demand and *Update* downloads the matching artifact (`full` or `portable`) and installs it in place — silently over the current installation for full, via an exe swap after exit for portable. *Contact the developer* opens the repository [Discussions](https://github.com/denvisss/WPIC/discussions).
+
 ## ⚙️ Customization (no rebuild needed)
 
 **Apps** — edit `configs/apps.json` next to the exe (embedded copy is used when the file is absent, e.g. portable):
@@ -180,6 +197,7 @@ Copy-Item build\prune\payload\DriverPack\WPIC-Drivers.7z build\payload\DriverPac
 | Driver extraction cache / bundled 7-Zip | `%LOCALAPPDATA%\WPIC\driver-cache\`, `%LOCALAPPDATA%\WPIC\tools\` |
 | Unpacked winget payload (portable) | `%LOCALAPPDATA%\WPIC\winget\` |
 | Catalog version cache | `%LOCALAPPDATA%\WPIC\catalog-versions.json` |
+| Removed built-in apps journal | `%LOCALAPPDATA%\WPIC\bloat-removed.json` |
 
 ## ✅ Verification
 
@@ -213,6 +231,9 @@ WPIC — утилита (WPF, .NET 8) для первых минут после 
 - 🗂 **Каталог** — 49 приложений в 7 разделах, описания RU/EN и бейджи версий, обновляемые из winget при каждом запуске; выбор галочками и пакетная установка.
 - 🔍 **Поиск в winget** — установка любых пакетов репозитория.
 - 🛠 **20 твиков** — категории, отметки риска, снимок значений до применения, откат одной кнопкой.
+- 🧹 **Удаление встроенных приложений** — список Appx-приложений Windows с иконками, датами установки и отметкой риска удаления; удаление для текущего пользователя и восстановление из встроенного образа Windows.
+- ⬆️ **Самообновление** — проверка релизов GitHub при запуске (красная точка на шестерёнке настроек); обновление поверх текущей версии из настроек.
+- 💬 **Обратная связь** — «Написать разработчику» открывает Discussions репозитория.
 - 🌐 **Интерфейс** — русский/английский, тёмная/светлая темы.
 - 📜 **Журнал** — все операции в экране и на диске.
 
@@ -225,6 +246,10 @@ WPIC — утилита (WPF, .NET 8) для первых минут после 
 | Вкладка «Драйверы»: автоопределение | Твики: категории и статусы |
 |---|---|
 | ![Драйверы](docs/images/live-drivers.png) | ![Твики](docs/images/tweaks-ru-top.png) |
+
+| Удаление встроенных приложений | Настройки: выпадающие списки и проверка обновлений |
+|---|---|
+| ![Встроенные приложения](docs/images/bloat-ru.png) | ![Настройки](docs/images/settings-ru.png) |
 
 ## 📥 Выпуски
 
@@ -297,6 +322,16 @@ Zip-варианты содержат тот же exe, что и одноимё�
 
 Перед применением значения реестра и системных параметров сохраняются в `%LOCALAPPDATA%\WPIC\backup\<дата>\registry-backup.json`; ошибка копирования останавливает применение. Откат берёт исходные значения до первого применения из `%LOCALAPPDATA%\WPIC\tweak-originals.json` (переживает повторное применение и перезапуск). При отсутствии исходной копии значения по умолчанию не подставляются; восстановление не отменяет `command`-твики.
 
+## 🧹 Удаление встроенных приложений
+
+Вкладка между «Приложения» и «Твики системы» показывает встроенные Appx-пакеты Windows (только main-пакеты) с настоящими иконками, локализованными именами и датами установки. У каждой строки — точка риска удаления: зелёная «безопасно», жёлтая «требует внимания», красная «рискованно» (магазин, winget, безопасность и компоненты оболочки — красные; необязательные приложения — зелёные). Системные пакеты с признаком non-removable выбрать нельзя.
+
+Удаление выполняется `Remove-AppxPackage` только для текущего пользователя. Удалённые через WPIC приложения запоминаются в `%LOCALAPPDATA%\WPIC\bloat-removed.json` и показываются отдельной группой — оттуда их можно заново зарегистрировать из встроенного образа Windows (`Add-AppxPackage -RegisterByFamilyName`). Оба действия спрашивают подтверждение с предупреждением по смыслу раздела; точка восстановления создаётся с той же панели.
+
+## ⬆️ Обновления и обратная связь
+
+WPIC проверяет релизы GitHub один раз при запуске. Если вышла новая версия, на шестерёнке настроек загорается красная точка; «Настройки → Проверить обновление» проверяет вручную, а «Обновить» скачивает подходящий артефакт (`full` или `portable`) и ставит поверх: full — тихим установщиком, portable — подменой exe после выхода программы. «Написать разработчику» открывает [Discussions](https://github.com/denvisss/WPIC/discussions) репозитория.
+
 ## ⚙️ Настройка без пересборки
 
 **Приложения** — `configs/apps.json` рядом с exe (при отсутствии файла используется встроенная копия):
@@ -367,6 +402,7 @@ Copy-Item build\prune\payload\DriverPack\WPIC-Drivers.7z build\payload\DriverPac
 | Кэш драйверов / встроенный 7-Zip | `%LOCALAPPDATA%\WPIC\driver-cache\`, `%LOCALAPPDATA%\WPIC\tools\` |
 | Распакованный winget-пак (portable) | `%LOCALAPPDATA%\WPIC\winget\` |
 | Кэш версий каталога | `%LOCALAPPDATA%\WPIC\catalog-versions.json` |
+| Журнал удалённых встроенных приложений | `%LOCALAPPDATA%\WPIC\bloat-removed.json` |
 
 ## ✅ Проверка
 
