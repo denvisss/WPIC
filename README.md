@@ -25,7 +25,7 @@ WPIC prepares a freshly installed Windows 10/11 (x64) for real use: it brings th
 
 - 🖧 **Offline drivers** — detects NIC/Wi-Fi adapters without a driver, matches hardware IDs against a curated pack, installs the newest matching version via `pnputil`.
 - 📦 **Offline winget** — signed `AppInstaller` / `VCLibs` / `UI.Xaml` packages are embedded in the executable; winget bootstraps without internet.
-- 🗂 **App catalog** — 49 apps in 7 sections, RU/EN descriptions, version badges refreshed from winget at startup; multi-select, one install button.
+- 🗂 **App catalog & winget search** — the curated catalog of 49 popular apps in 7 sections opens automatically, but that is only a starting point: the built-in search installs **any** package from the entire winget repository. Version badges refresh from winget at startup; multi-select, one install button.
 - 🛠 **38 system tweaks** — five collapsible icon categories, per-category *Select all*, risk dots, automatic registry snapshot, one-click undo.
 - 🧹 **Built-in app removal** — curated UWP catalog with real icons, install dates and per-app removal risk; verified removal, optional provisioned cleanup, restore from the Windows image.
 - ⬆️ **Self-update** — GitHub releases are checked at startup; the update installs in place from Settings.
@@ -126,7 +126,7 @@ WPIC готовит чистую Windows 10/11 (x64) к работе: подни
 
 - 🖧 **Офлайн-драйверы** — находит NIC/Wi-Fi без драйвера, подбирает по ID оборудования из курируемого пака, ставит новейшую подходящую версию через `pnputil`.
 - 📦 **Офлайн-winget** — подписанные `AppInstaller` / `VCLibs` / `UI.Xaml` встроены в exe; winget поднимается без интернета.
-- 🗂 **Каталог приложений** — 49 приложений в 7 разделах, описания RU/EN, бейджи версий из winget при запуске; мультивыбор, одна кнопка установки.
+- 🗂 **Каталог и поиск winget** — при запуске автоматически открывается курируемый каталог из 49 популярных приложений в 7 разделах, но это только отправная точка: встроенный поиск устанавливает **любое** приложение из всего репозитория winget. Бейджи версий обновляются из winget при запуске; мультивыбор, одна кнопка установки.
 - 🛠 **38 твиков** — пять раскрываемых категорий с иконками, «выбрать все» по категории, точки риска, снимок реестра до применения, откат одной кнопкой.
 - 🧹 **Удаление встроенных приложений** — курируемый каталог UWP с настоящими иконками, датами установки и риском удаления; проверенное удаление, опциональная чистка provisioned, восстановление из образа Windows.
 - ⬆️ **Самообновление** — проверка релизов GitHub при запуске, установка поверх из настроек.
