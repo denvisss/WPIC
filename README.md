@@ -10,7 +10,7 @@
 [![Downloads](https://img.shields.io/github/downloads/denvisss/WPIC/total?label=downloads)](https://github.com/denvisss/WPIC/releases)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](#-building-from-source)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D6?logo=windows&logoColor=white)](#-requirements)
-[![Tests](https://img.shields.io/badge/tests-126%20passing-2ea44f)](#-verification)
+[![Tests](https://img.shields.io/badge/tests-158%20passing-2ea44f)](#-verification)
 [![UI languages](https://img.shields.io/badge/UI-EN%20%7C%20RU-informational)](#)
 
 **English** · [Русский](#-русский)
@@ -35,7 +35,7 @@ WPIC prepares a freshly installed Windows 10/11 (x64) for real use: it brings th
 
 | App catalog | Built-in app removal |
 |---|---|
-| ![Catalog](docs/images/catalog-ru.png) | ![Built-in apps](docs/images/bloat-ru.png) |
+| ![Catalog](docs/images/catalog-en.png) | ![Built-in apps](docs/images/bloat-ru.png) |
 
 | Drivers tab | System tweaks |
 |---|---|
@@ -47,12 +47,10 @@ Download from [GitHub Releases](https://github.com/denvisss/WPIC/releases/latest
 
 | Artifact | Size | Contents |
 |---|---|---|
-| `WPIC_1.1.0-full.exe` | ≈ 368 MiB | Inno Setup installer: app + embedded LAN/Wi-Fi driver pack + offline winget |
-| `WPIC_1.1.0-full.zip` | ≈ 368 MiB | The same installer in a zip |
-| `WPIC_1.1.0-portable.exe` | ≈ 134 MiB | Single-file portable app: embedded winget, no bundled drivers |
-| `WPIC_1.1.0-portable.zip` | ≈ 127 MiB | The same portable exe in a zip |
+| `WPIC_1.1.0-full.exe` (also `.zip`) | 368.8 MiB | Inno Setup installer: app + embedded LAN/Wi-Fi driver pack + offline winget — for a clean machine without network: install, open *Drivers*, press one button |
+| `WPIC_1.1.0-portable.exe` (also `.zip`) | 133.6 MiB | Single-file app: offline winget, no bundled drivers — a USB toolkit, pair it with any compatible driver pack |
 
-**Full** — for a clean machine without network: install, open the *Drivers* tab, press one button. **Portable** — for a USB toolkit: pair it with any compatible driver pack. Both require Windows 10 (1809+) / 11 x64 and administrator rights; the .NET runtime is embedded; internet is needed only for app installation from winget.
+Windows 10 (1809+) / 11 x64, administrator rights; the .NET runtime is embedded, internet is needed only for app installation from winget.
 
 ## 🖧 Driver packs
 
@@ -148,12 +146,10 @@ WPIC готовит чистую Windows 10/11 (x64) к работе: подни
 
 | Артефакт | Размер | Содержимое |
 |---|---|---|
-| `WPIC_1.1.0-full.exe` | ≈ 368 МиБ | Установщик Inno Setup: приложение + встроенный пак драйверов LAN/Wi-Fi + офлайн-winget |
-| `WPIC_1.1.0-full.zip` | ≈ 368 МиБ | Тот же установщик в zip |
-| `WPIC_1.1.0-portable.exe` | ≈ 134 МиБ | Портативный exe: встроенный winget, без встроенных драйверов |
-| `WPIC_1.1.0-portable.zip` | ≈ 127 МиБ | Тот же portable exe в zip |
+| `WPIC_1.1.0-full.exe` (и `.zip`) | 368.8 МиБ | Установщик Inno Setup: приложение + встроенный пак драйверов LAN/Wi-Fi + офлайн-winget — для чистой машины без сети: установил, открыл «Драйверы», одна кнопка |
+| `WPIC_1.1.0-portable.exe` (и `.zip`) | 133.6 МиБ | Портативный exe: встроенный winget, без встроенных драйверов — для флешки, в связке с любым совместимым паком |
 
-**Full** — для чистой машины без сети: установил, открыл «Драйверы», одна кнопка. **Portable** — для флешки: носите вместе с любым совместимым паком драйверов. Обе версии: Windows 10 (1809+) / 11 x64, права администратора, .NET встроен; интернет нужен только для установки приложений через winget.
+Windows 10 (1809+) / 11 x64, права администратора; .NET встроен, интернет нужен только для установки приложений через winget.
 
 ## 🖧 Паки драйверов
 
