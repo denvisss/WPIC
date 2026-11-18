@@ -23,4 +23,5 @@ build/list-*.txt
 build/prune/
 build/dedupe/
 build/release/
+build/release-archive/
 build/publish-portable/
