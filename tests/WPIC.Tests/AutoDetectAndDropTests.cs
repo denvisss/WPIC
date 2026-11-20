@@ -1,5 +1,4 @@
 using System.IO;
-using System.Security.Cryptography;
 using WPIC.Services;
 using Xunit;
 
@@ -48,15 +47,22 @@ public class AutoDetectAndDropTests
         Assert.Empty(problems);
     }
 
-    [Theory]
-    [InlineData("AppInstaller_x64.msix", "0E69BF5F2BCB014ADC1688F0036BC6E9BCEF779831BF6E4FC2435CB062099D85")]
-    [InlineData("Microsoft.VCLibs.x64.14.00.Desktop.appx", "B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961")]
-    [InlineData("Microsoft.UI.Xaml.2.8.x64.appx", "249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32C97226D2E46")]
-    public void EmbeddedWinget_PackagesAreBundledWithPinnedHashes(string file, string sha256)
+    [Fact]
+    public void WingetPayload_PinnedFilesHaveValidHashes()
     {
-        using var stream = typeof(DriverPackService).Assembly.GetManifestResourceStream("WPIC.Winget." + file);
-        Assert.NotNull(stream);
-        Assert.Equal(sha256, Convert.ToHexString(SHA256.HashData(stream!)));
+        Assert.Equal(3, WingetBootstrapService.PayloadFiles.Length);
+        foreach (var (file, size, sha256) in WingetBootstrapService.PayloadFiles)
+        {
+            Assert.Matches(@"^[\w.\-]+(\.msix|\.appx)$", file);
+            Assert.True(size > 0);
+            Assert.Matches("^[0-9A-F]{64}$", sha256);
+        }
+        Assert.Equal(
+            WingetBootstrapService.PayloadFiles.Select(p => p.File).ToArray(),
+            WingetBootstrapService.PayloadFiles.Select(p => p.File).Where(f =>
+                f == "AppInstaller_x64.msix" ||
+                f == "Microsoft.VCLibs.x64.14.00.Desktop.appx" ||
+                f == "Microsoft.UI.Xaml.2.8.x64.appx").ToArray());
     }
 
     [Fact]

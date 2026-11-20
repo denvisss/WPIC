@@ -5,13 +5,6 @@ $pack = Join-Path $PSScriptRoot 'payload\DriverPack'
 foreach ($name in @('WPIC-Drivers.7z', '7za64.exe')) {
     if (-not (Test-Path (Join-Path $pack $name))) { throw "Missing driver payload: $name" }
 }
-$winget = Join-Path $PSScriptRoot 'payload\winget'
-foreach ($name in @('AppInstaller_x64.msix', 'Microsoft.UI.Xaml.2.8.x64.appx', 'Microsoft.VCLibs.x64.14.00.Desktop.appx')) {
-    $sig = Get-AuthenticodeSignature (Join-Path $winget $name)
-    if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notlike 'CN=Microsoft Corporation,*') {
-        throw "Invalid Microsoft signature: $name"
-    }
-}
 if (-not $Iscc) {
     $Iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") |
         Where-Object { Test-Path $_ } | Select-Object -First 1
@@ -35,6 +28,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
 & $Iscc (Join-Path $PSScriptRoot 'installer.iss')
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
 
+# lite-установщик: то же приложение без пака драйверов
+& $Iscc '/DLITE' (Join-Path $PSScriptRoot 'installer.iss')
+if ($LASTEXITCODE -ne 0) { throw 'Lite installer compilation failed' }
+
 & dotnet publish $app -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true `
     -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
     -o (Join-Path $PSScriptRoot 'publish-portable') --nologo -v minimal
@@ -43,12 +40,13 @@ if ($LASTEXITCODE -ne 0) { throw 'Portable publish failed' }
 $release = Join-Path $PSScriptRoot 'release'
 New-Item -ItemType Directory -Force -Path $release | Out-Null
 Move-Item (Join-Path $PSScriptRoot "installer\WPIC_$version-full.exe") $release -Force
+Move-Item (Join-Path $PSScriptRoot "installer\WPIC_$version-lite.exe") $release -Force
 Copy-Item (Join-Path $PSScriptRoot 'publish-portable\WindowsPostInstallClient.exe') (Join-Path $release "WPIC_$version-portable.exe") -Force
 Remove-Item (Join-Path $PSScriptRoot 'publish-portable') -Recurse -Force
 
 # zip-варианты релиза: тот же exe, упакованный без сжатия (exe уже сжат)
 $sevenZip = Join-Path $pack '7za64.exe'
-foreach ($variant in @('full', 'portable')) {
+foreach ($variant in @('full', 'lite', 'portable')) {
     $exe = Join-Path $release "WPIC_$version-$variant.exe"
     $zip = Join-Path $release "WPIC_$version-$variant.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }

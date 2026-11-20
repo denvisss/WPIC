@@ -1,10 +1,16 @@
-﻿; Установщик «один файл»: приложение + офлайн-набор драйверов + офлайн-winget.
+﻿; Установщик «один файл»: приложение (+ пак драйверов в full; /DLITE — только приложение).
 #define AppName "Windows Post-Install Client"
-#define AppVersion "1.1.0"
+#define AppVersion "1.2.0"
 #define AppPublisher "denvisss"
 #define AppExeName "WindowsPostInstallClient.exe"
 #define PublishDir SourcePath + "publish"
 #define PayloadDir SourcePath + "payload"
+
+#ifdef LITE
+#define OutputName "WPIC_" + AppVersion + "-lite"
+#else
+#define OutputName "WPIC_" + AppVersion + "-full"
+#endif
 
 [Setup]
 AppId={{4F87FF46-EEDD-40FF-A484-A08B6AEE0C52}
@@ -15,7 +21,7 @@ DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 OutputDir=installer
-OutputBaseFilename=WPIC_{#AppVersion}-full
+OutputBaseFilename={#OutputName}
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -37,9 +43,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs
 Source: "{#PayloadDir}\DriverPack\7za64.exe"; DestDir: "{app}"; Flags: ignoreversion
+#ifndef LITE
 Source: "{#PayloadDir}\DriverPack\*"; DestDir: "{app}\DriverPack"; Flags: ignoreversion recursesubdirs
-; winget-пак не кладём рядом с exe: он встроен в ресурсы exe и распаковывается
-; в %LOCALAPPDATA%\WPIC\winget при первом обращении (как в portable) — без дубликата ~69 МиБ.
+#endif
 
 [InstallDelete]
 ; старое имя сборки до переименования приложения

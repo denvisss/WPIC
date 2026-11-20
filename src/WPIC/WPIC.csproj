@@ -11,7 +11,7 @@
     <ApplicationManifest Condition="'$(Configuration)' == 'Debug'">app.debug.manifest</ApplicationManifest>
     <RootNamespace>WPIC</RootNamespace>
     <AssemblyName>WindowsPostInstallClient</AssemblyName>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Product>Windows Post-Install Client</Product>
     <AssemblyTitle>Windows Post-Install Client</AssemblyTitle>
     <Description>Установка приложений, драйверов и твиков после чистой установки Windows</Description>
@@ -33,11 +33,6 @@
     <EmbeddedResource Include="configs\tweaks.json" LogicalName="WPIC.configs.tweaks.json"/>
     <EmbeddedResource Include="Resources\strings.ru.json" LogicalName="WPIC.Resources.strings.ru.json" WithCulture="false"/>
     <EmbeddedResource Include="Resources\strings.en.json" LogicalName="WPIC.Resources.strings.en.json" WithCulture="false"/>
-    <!-- Winget-пак (build/fetch-winget.ps1) встроен в exe: portable ставит winget без интернета.
-         Payload не в git — перед сборкой запустите build/fetch-winget.ps1 (CI делает это сам). -->
-    <EmbeddedResource Include="..\..\build\payload\winget\AppInstaller_x64.msix" LogicalName="WPIC.Winget.AppInstaller_x64.msix"/>
-    <EmbeddedResource Include="..\..\build\payload\winget\Microsoft.VCLibs.x64.14.00.Desktop.appx" LogicalName="WPIC.Winget.Microsoft.VCLibs.x64.14.00.Desktop.appx"/>
-    <EmbeddedResource Include="..\..\build\payload\winget\Microsoft.UI.Xaml.2.8.x64.appx" LogicalName="WPIC.Winget.Microsoft.UI.Xaml.2.8.x64.appx"/>
   </ItemGroup>
 
   <ItemGroup>

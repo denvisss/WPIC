@@ -14,13 +14,5 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Fetch winget payload (embedded into the app at build time)
-        shell: powershell
-        run: |
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          New-Item -ItemType Directory -Force -Path build\payload\DriverPack | Out-Null
-          Copy-Item src\WPIC\Tools\7za64.exe build\payload\DriverPack\7za64.exe
-          .\build\fetch-winget.ps1
-
       - name: Test
         run: dotnet test tests/WPIC.Tests/WPIC.Tests.csproj -c Release --nologo

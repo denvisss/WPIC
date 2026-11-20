@@ -10,7 +10,7 @@
 [![Downloads](https://img.shields.io/github/downloads/denvisss/WPIC/total?label=downloads)](https://github.com/denvisss/WPIC/releases)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](#-building-from-source)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D6?logo=windows&logoColor=white)](#-requirements)
-[![Tests](https://img.shields.io/badge/tests-158%20passing-2ea44f)](#-verification)
+[![Tests](https://img.shields.io/badge/tests-156%20passing-2ea44f)](#-verification)
 [![UI languages](https://img.shields.io/badge/UI-EN%20%7C%20RU-informational)](#)
 
 **English** · [Русский](#-русский)
@@ -23,8 +23,8 @@
 
 WPIC prepares a freshly installed Windows 10/11 (x64) for real use: it brings the network up, installs the software you select and tunes the system — every step offline-capable, logged and reversible.
 
-- 🖧 **Offline drivers** — detects NIC/Wi-Fi adapters without a driver, matches hardware IDs against a curated pack, installs the newest matching version via `pnputil`.
-- 📦 **Offline winget** — signed `AppInstaller` / `VCLibs` / `UI.Xaml` packages are embedded in the executable; winget bootstraps without internet.
+- 🖧 **Offline drivers** — detects NIC/Wi-Fi adapters without a driver, matches hardware IDs against a curated pack, installs the newest matching version via `pnputil`; third-party drivers can be **exported** to a folder (optionally packed into a single 7z) and **restored** after reinstalling Windows.
+- 🧭 **Environment panel** — a bar above the tabs shows the state of winget, Microsoft Store and the NIC driver, each with its own button: install winget with or without the Store (payload is downloaded from official Microsoft sources and verified by SHA-256), restore the Store, update winget, or match a NIC driver from a pack.
 - 🗂 **App catalog & winget search** — the curated catalog of 49 popular apps in 7 sections opens automatically, but that is only a starting point: the built-in search installs **any** package from the entire winget repository. Version badges refresh from winget at startup; multi-select, one install button.
 - 🛠 **38 system tweaks** — five collapsible icon categories, per-category *Select all*, risk dots, automatic registry snapshot, one-click undo.
 - 🧹 **Built-in app removal** — curated UWP catalog with real icons, install dates and per-app removal risk; verified removal, optional provisioned cleanup, restore from the Windows image.
@@ -47,8 +47,9 @@ Download from [GitHub Releases](https://github.com/denvisss/WPIC/releases/latest
 
 | Artifact | Size | Contents |
 |---|---|---|
-| `WPIC_1.1.0-full.exe` (also `.zip`) | 368.8 MiB | Inno Setup installer: app + embedded LAN/Wi-Fi driver pack + offline winget — for a clean machine without network: install, open *Drivers*, press one button |
-| `WPIC_1.1.0-portable.exe` (also `.zip`) | 133.6 MiB | Single-file app: offline winget, no bundled drivers — a USB toolkit, pair it with any compatible driver pack |
+| `WPIC_1.2.0-full.exe` (also `.zip`) | 302.0 MiB | Inno Setup installer: app + embedded LAN/Wi-Fi driver pack — for a clean machine without network: install, open *Drivers*, press one button |
+| `WPIC_1.2.0-lite.exe` (also `.zip`) | 59.0 MiB | The same installer without the driver pack |
+| `WPIC_1.2.0-portable.exe` (also `.zip`) | 64.0 MiB | Single-file app, no installer — a USB toolkit, pair it with any compatible driver pack |
 
 Windows 10 (1809+) / 11 x64, administrator rights; the .NET runtime is embedded, internet is needed only for app installation from winget.
 
@@ -79,15 +80,14 @@ Tweak actions: `registry` (original value and its real type are saved automatica
 
 ## 🔨 Building from source
 
-Requires .NET 8 SDK, Windows and Inno Setup 6.3+. The winget payload is embedded at compile time — fetch it once before the first build or `dotnet test`:
+Requires .NET 8 SDK, Windows and Inno Setup 6.3+ (installers only). The full installer additionally needs the curated driver pack in `build\payload\DriverPack\` — `run-curate.ps1` rebuilds it from source lists; tests and the portable/lite builds work without it.
 
 ```powershell
-.\build\fetch-winget.ps1
 dotnet test tests\WPIC.Tests\WPIC.Tests.csproj
 .\build\build-release.ps1
 ```
 
-`build-release.ps1` verifies Microsoft signatures, runs Release tests and produces all four artifacts with `.sha256` in `build\release\`. CI fetches the payload and runs the tests on Windows for every push and PR.
+`build-release.ps1` runs Release tests, publishes the app and produces six artifacts — `full` / `lite` / `portable` exe plus a zip of each, all with `.sha256` sidecars — in `build\release\`. The lite installer ships without the driver pack. CI runs the tests on Windows for every push and PR.
 
 ## 📁 Data locations
 
@@ -96,17 +96,17 @@ dotnet test tests\WPIC.Tests\WPIC.Tests.csproj
 | Logs | `%LOCALAPPDATA%\WPIC\logs\` |
 | Registry backups / tweak originals | `%LOCALAPPDATA%\WPIC\backup\`, `tweak-originals.json` |
 | Driver extraction cache, bundled 7-Zip | `%LOCALAPPDATA%\WPIC\driver-cache\`, `tools\` |
-| Unpacked winget payload (portable) | `%LOCALAPPDATA%\WPIC\winget\` |
+| Downloaded winget payload (cached) | `%LOCALAPPDATA%\WPIC\winget\` |
 | Catalog version cache | `%LOCALAPPDATA%\WPIC\catalog-versions.json` |
 | Removed built-in apps journal | `%LOCALAPPDATA%\WPIC\bloat-removed.json` |
 
 ## ✅ Verification
 
-158 xUnit tests (catalog contract, winget parsing, tweak engine, driver index, localization) plus offscreen WPF harnesses that drive the real views: catalog rendering and batch install, tweak expanders/select-all/apply/undo on an isolated registry key, winget banner states, pack drag & drop and index-in-archive loading.
+156 xUnit tests (catalog contract, winget parsing, tweak engine, driver index, localization) plus offscreen WPF harnesses that drive the real views: catalog rendering and batch install, tweak expanders/select-all/apply/undo on an isolated registry key, winget banner states, pack drag & drop and index-in-archive loading.
 
 ## 📜 License
 
-The code is licensed under the [MIT License](LICENSE) — copying is permitted with attribution. Bundled components: `7za64.exe` (7-Zip, LGPL), unmodified signed Microsoft packages (winget payloads). Third-party driver licensing remains the user's responsibility.
+The code is licensed under the [MIT License](LICENSE) — copying is permitted with attribution. Bundled component: `7za64.exe` (7-Zip, LGPL). Winget packages are downloaded at runtime from official Microsoft sources and verified by SHA-256. Third-party driver licensing remains the user's responsibility.
 
 ---
 
@@ -122,8 +122,8 @@ The code is licensed under the [MIT License](LICENSE) — copying is permitted w
 
 WPIC готовит чистую Windows 10/11 (x64) к работе: поднимает сеть, устанавливает выбранные приложения и настраивает систему — каждый шаг работает офлайн, пишется в журнал и откатывается.
 
-- 🖧 **Офлайн-драйверы** — находит NIC/Wi-Fi без драйвера, подбирает по ID оборудования из курируемого пака, ставит новейшую подходящую версию через `pnputil`.
-- 📦 **Офлайн-winget** — подписанные `AppInstaller` / `VCLibs` / `UI.Xaml` встроены в exe; winget поднимается без интернета.
+- 🖧 **Офлайн-драйверы** — находит NIC/Wi-Fi без драйвера, подбирает по ID оборудования из курируемого пака, ставит новейшую подходящую версию через `pnputil`; сторонние драйверы можно **экспортировать** в папку (опционально в один 7z) и **восстановить** после переустановки Windows.
+- 🧭 **Панель окружения** — полоса над вкладками показывает состояние winget, Microsoft Store и драйвера сетевой карты; у каждого свой пункт: установка winget с магазином или без (пак скачивается из официальных источников Microsoft и проверяется по SHA-256), восстановление магазина, обновление winget или подбор драйвера NIC из пака.
 - 🗂 **Каталог и поиск winget** — при запуске автоматически открывается курируемый каталог из 49 популярных приложений в 7 разделах, но это только отправная точка: встроенный поиск устанавливает **любое** приложение из всего репозитория winget. Бейджи версий обновляются из winget при запуске; мультивыбор, одна кнопка установки.
 - 🛠 **38 твиков** — пять раскрываемых категорий с иконками, «выбрать все» по категории, точки риска, снимок реестра до применения, откат одной кнопкой.
 - 🧹 **Удаление встроенных приложений** — курируемый каталог UWP с настоящими иконками, датами установки и риском удаления; проверенное удаление, опциональная чистка provisioned, восстановление из образа Windows.
@@ -146,8 +146,9 @@ WPIC готовит чистую Windows 10/11 (x64) к работе: подни
 
 | Артефакт | Размер | Содержимое |
 |---|---|---|
-| `WPIC_1.1.0-full.exe` (и `.zip`) | 368.8 МиБ | Установщик Inno Setup: приложение + встроенный пак драйверов LAN/Wi-Fi + офлайн-winget — для чистой машины без сети: установил, открыл «Драйверы», одна кнопка |
-| `WPIC_1.1.0-portable.exe` (и `.zip`) | 133.6 МиБ | Портативный exe: встроенный winget, без встроенных драйверов — для флешки, в связке с любым совместимым паком |
+| `WPIC_1.2.0-full.exe` (и `.zip`) | 302.0 МиБ | Установщик Inno Setup: приложение + встроенный пак драйверов LAN/Wi-Fi — для чистой машины без сети: установил, открыл «Драйверы», одна кнопка |
+| `WPIC_1.2.0-lite.exe` (и `.zip`) | 59.0 МиБ | Тот же установщик без пака драйверов |
+| `WPIC_1.2.0-portable.exe` (и `.zip`) | 64.0 МиБ | Портативный exe без установщика — для флешки, в связке с любым совместимым паком |
 
 Windows 10 (1809+) / 11 x64, права администратора; .NET встроен, интернет нужен только для установки приложений через winget.
 
@@ -178,15 +179,14 @@ Windows 10 (1809+) / 11 x64, права администратора; .NET вс�
 
 ## 🔨 Сборка
 
-Нужны .NET 8 SDK, Windows и Inno Setup 6.3+. Winget-пак встраивается при компиляции — скачайте его один раз до первой сборки или `dotnet test`:
+Нужны .NET 8 SDK, Windows и Inno Setup 6.3+ (только для установщиков). Full-установщику дополнительно нужен курируемый пак драйверов в `build\payload\DriverPack\` — `run-curate.ps1` собирает его из исходных списков; тестам и сборкам portable/lite он не требуется.
 
 ```powershell
-.\build\fetch-winget.ps1
 dotnet test tests\WPIC.Tests\WPIC.Tests.csproj
 .\build\build-release.ps1
 ```
 
-`build-release.ps1` проверяет подписи Microsoft, прогоняет Release-тесты и создаёт четыре артефакта с `.sha256` в `build\release\`. CI скачивает пак и гоняет тесты на Windows для каждого push и PR.
+`build-release.ps1` прогоняет Release-тесты, публикует приложение и создаёт шесть артефактов — exe и zip для `full` / `lite` / `portable`, у каждого `.sha256` — в `build\release\`. Lite-установщик поставляется без пака драйверов. CI гоняет тесты на Windows для каждого push и PR.
 
 ## 📁 Данные приложения
 
@@ -195,14 +195,14 @@ dotnet test tests\WPIC.Tests\WPIC.Tests.csproj
 | Журналы | `%LOCALAPPDATA%\WPIC\logs\` |
 | Копии реестра / исходные значения твиков | `%LOCALAPPDATA%\WPIC\backup\`, `tweak-originals.json` |
 | Кэш драйверов, встроенный 7-Zip | `%LOCALAPPDATA%\WPIC\driver-cache\`, `tools\` |
-| Распакованный winget-пак (portable) | `%LOCALAPPDATA%\WPIC\winget\` |
+| Скачанный winget-пак (кэш) | `%LOCALAPPDATA%\WPIC\winget\` |
 | Кэш версий каталога | `%LOCALAPPDATA%\WPIC\catalog-versions.json` |
 | Журнал удалённых встроенных приложений | `%LOCALAPPDATA%\WPIC\bloat-removed.json` |
 
 ## ✅ Проверка
 
-158 тестов xUnit (контракт каталога, парсинг winget, движок твиков, индекс драйверов, локализация) плюс офскрин-харнесы на реальных вкладках: каталог и пакетная установка, категории-раскрывашки твиков, «выбрать все», применение/откат на изолированном ключе реестра, баннер winget, drag & drop пака и чтение индекса из архива.
+156 тестов xUnit (контракт каталога, парсинг winget, движок твиков, индекс драйверов, локализация) плюс офскрин-харнесы на реальных вкладках: каталог и пакетная установка, категории-раскрывашки твиков, «выбрать все», применение/откат на изолированном ключе реестра, баннер winget, drag & drop пака и чтение индекса из архива.
 
 ## 📜 Лицензия
 
-Код — под лицензией [MIT](LICENSE) — копирование разрешено с указанием авторства. В составе распространяются `7za64.exe` (7-Zip, LGPL) и неизменённые подписанные пакеты Microsoft (winget). Ответственность за лицензии сторонних драйверов — на пользователе.
+Код — под лицензией [MIT](LICENSE) — копирование разрешено с указанием авторства. В составе распространяется `7za64.exe` (7-Zip, LGPL). Пакеты winget скачиваются во время работы из официальных источников Microsoft и проверяются по SHA-256. Ответственность за лицензии сторонних драйверов — на пользователе.

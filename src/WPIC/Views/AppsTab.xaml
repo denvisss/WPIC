@@ -195,9 +195,6 @@
                                        Foreground="{DynamicResource Brush.TextSecondary}"/>
                             <Button x:Name="BtnWingetInstall" Style="{DynamicResource PrimaryButton}" HorizontalAlignment="Left"
                                     Content="{loc:L10n winget.ui.install}" Margin="0,10,0,0" Click="BtnWingetInstall_Click"/>
-                            <TextBlock Text="{loc:L10n winget.ui.noPayload}" Margin="0,10,0,0" FontSize="12" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource Brush.TextSecondary}" x:Name="TxtWingetNoPayload"
-                                       Visibility="Collapsed"/>
                             <StackPanel x:Name="WingetProgressPanel" Orientation="Horizontal" Margin="0,10,0,0" Visibility="Collapsed">
                                 <ProgressBar x:Name="WingetProgress" Width="240" Height="14" IsIndeterminate="True"
                                              VerticalAlignment="Center"/>

@@ -501,26 +501,22 @@ public partial class AppsTab : UserControl
         {
             _wingetChecking = false;
         }
-        await UpdateWingetUiAsync();
+        UpdateWingetUi();
     }
 
-    private async Task UpdateWingetUiAsync()
+    private void UpdateWingetUi()
     {
-        var payload = await Task.Run(WingetBootstrapService.FindPayload);
         var missing = !_wingetInstalled;
         TxtWingetBadge.Visibility = missing ? Visibility.Visible : Visibility.Collapsed;
         WingetBanner.Visibility = missing ? Visibility.Visible : Visibility.Collapsed;
         WingetProgressPanel.Visibility = Visibility.Collapsed;
-        BtnWingetInstall.Visibility = missing && payload != null ? Visibility.Visible : Visibility.Collapsed;
-        TxtWingetNoPayload.Visibility = missing && payload == null ? Visibility.Visible : Visibility.Collapsed;
-        BtnWingetInstall.IsEnabled = payload != null && !_wingetInstalling;
+        BtnWingetInstall.Visibility = missing && !_wingetInstalling ? Visibility.Visible : Visibility.Collapsed;
+        BtnWingetInstall.IsEnabled = !_wingetInstalling;
     }
 
     private async void BtnWingetInstall_Click(object sender, RoutedEventArgs e)
     {
         if (_wingetInstalling) return;
-        var payload = await Task.Run(WingetBootstrapService.FindPayload);
-        if (payload == null) return;
 
         _wingetInstalling = true;
         BtnWingetInstall.IsEnabled = false;
@@ -534,7 +530,7 @@ public partial class AppsTab : UserControl
         });
         try
         {
-            if (await WingetBootstrapService.InstallOfflineAsync(payload, progress))
+            if (await WingetBootstrapService.InstallAsync(progress))
             {
                 _wingetInstalled = true;
                 TxtWingetProgress.Text = L10n.T("winget.ui.done");
@@ -554,7 +550,7 @@ public partial class AppsTab : UserControl
         finally
         {
             _wingetInstalling = false;
-            await UpdateWingetUiAsync();
+            UpdateWingetUi();
         }
     }
 
@@ -567,14 +563,10 @@ public partial class AppsTab : UserControl
         try
         {
             if (await WingetService.IsAvailableAsync()) return true;
-            var payload = await Task.Run(WingetBootstrapService.FindPayload);
-            if (payload != null)
-            {
-                if (ThemedMessageBox.Show(L10n.T("winget.boot.confirm"), L10n.T("winget.boot.title"),
+            if (ThemedMessageBox.Show(L10n.T("winget.boot.confirm"), L10n.T("winget.boot.title"),
                     MessageBoxButton.YesNo, MessageBoxImage.Question, Window.GetWindow(this)) != MessageBoxResult.Yes)
-                    return false;
-                if (await WingetBootstrapService.InstallOfflineAsync(payload, _progress)) return true;
-            }
+                return false;
+            if (await WingetBootstrapService.InstallAsync(_progress)) return true;
         }
         catch (Exception ex) { LogService.Log(ex.Message); }
         finally { _bootstrapping = false; }

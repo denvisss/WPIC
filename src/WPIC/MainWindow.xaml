@@ -33,6 +33,42 @@
             </DockPanel>
         </Border>
 
+        <!-- Панель окружения: winget / Microsoft Store / драйвер сетевой карты -->
+        <Border DockPanel.Dock="Top" Margin="8,8,8,0" Padding="12,8" CornerRadius="10"
+                Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Width="16" Height="16" Stretch="Uniform" StrokeThickness="1.8" Stroke="{DynamicResource Grad.Cyan}"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                          Data="M12 2 L14.5 9 H21.5 L15.5 13.5 L18 21 L12 16.5 L6 21 L8.5 13.5 L2.5 9 H9.5 Z"/>
+                    <TextBlock Text="{loc:L10n env.title}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"
+                               Margin="8,0,16,0"/>
+                    <Ellipse x:Name="DotEnvWinget" Width="9" Height="9" Fill="{DynamicResource Brush.Danger}"
+                             VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtEnvWinget" Text="{loc:L10n env.winget}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="12.5"/>
+                    <Ellipse x:Name="DotEnvStore" Width="9" Height="9" Fill="{DynamicResource Brush.Danger}"
+                             VerticalAlignment="Center" Margin="16,0,0,0"/>
+                    <TextBlock Text="{loc:L10n env.store}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="12.5"/>
+                    <Ellipse x:Name="DotEnvNic" Width="9" Height="9" Fill="{DynamicResource Brush.Danger}"
+                             VerticalAlignment="Center" Margin="16,0,0,0"/>
+                    <TextBlock Text="{loc:L10n env.nic}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="12.5"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="BtnEnvWingetInstall" Style="{DynamicResource PrimaryButton}" Padding="10,4" FontSize="12"
+                            Content="{loc:L10n env.installWinget}" Visibility="Collapsed" Click="BtnEnvWingetInstall_Click"/>
+                    <Button x:Name="BtnEnvWingetStore" Padding="10,4" FontSize="12" Margin="8,0,0,0"
+                            Content="{loc:L10n env.installWingetStore}" Visibility="Collapsed" Click="BtnEnvWingetStore_Click"/>
+                    <Button x:Name="BtnEnvWingetUpdate" Padding="10,4" FontSize="12"
+                            Content="{loc:L10n env.updateWinget}" Visibility="Collapsed" Click="BtnEnvWingetUpdate_Click"/>
+                    <Button x:Name="BtnEnvStoreRestore" Padding="10,4" FontSize="12" Margin="8,0,0,0"
+                            Content="{loc:L10n env.restoreStore}" Visibility="Collapsed" Click="BtnEnvStoreRestore_Click"/>
+                    <Button x:Name="BtnEnvNicFix" Padding="10,4" FontSize="12" Margin="8,0,0,0"
+                            Content="{loc:L10n env.installNic}" Visibility="Collapsed" Click="BtnEnvNicFix_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem x:Name="StatusText" Content="{loc:L10n main.ready}"/>
         </StatusBar>

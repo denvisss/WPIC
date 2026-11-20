@@ -1,66 +1,199 @@
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace WPIC.Services;
 
+/// <summary>
+/// Установка winget: пакеты скачиваются из официальных источников Microsoft во время работы
+/// (в exe они больше не встроены), проверяются по SHA-256 и ставятся через Add-AppxPackage.
+/// </summary>
 public static class WingetBootstrapService
 {
     public const string PayloadDirName = "winget";
-    private static readonly (string File, string Sha256)[] EmbeddedPackages =
-    {
-        ("AppInstaller_x64.msix", "0E69BF5F2BCB014ADC1688F0036BC6E9BCEF779831BF6E4FC2435CB062099D85"),
-        ("Microsoft.VCLibs.x64.14.00.Desktop.appx", "B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961"),
-        ("Microsoft.UI.Xaml.2.8.x64.appx", "249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32C97226D2E46")
-    };
-    private static readonly string[] PackageFiles = EmbeddedPackages.Select(p => p.File).ToArray();
 
-    /// <summary>Пак рядом с exe (установленная версия) либо распакованный из ресурсов в %LOCALAPPDATA%\WPIC\winget.</summary>
+    // Официальные пакеты winget 1.7.10861 (x64). Размер и SHA-256 фиксируют содержимое на момент скачивания.
+    public static readonly (string File, long Size, string Sha256)[] PayloadFiles =
+    {
+        ("AppInstaller_x64.msix", 60247360,
+            "0E69BF5F2BCB014ADC1688F0036BC6E9BCEF779831BF6E4FC2435CB062099D85"),
+        ("Microsoft.VCLibs.x64.14.00.Desktop.appx", 6764349,
+            "B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961"),
+        ("Microsoft.UI.Xaml.2.8.x64.appx", 5121145,
+            "249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32C97226D2E46")
+    };
+    private static readonly string[] PackageFiles = PayloadFiles.Select(p => p.File).ToArray();
+
+    public const string BundleUrl =
+        "https://github.com/microsoft/winget-cli/releases/download/v1.7.10861/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle";
+    public const string VclibsUrl = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx";
+    public const string UiXamlUrl =
+        "https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx";
+
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromMinutes(30) };
+    private static bool? _cacheValid;
+
+    public static string CacheDir => Path.Combine(LogService.DataDirectory, PayloadDirName);
+
+    /// <summary>Готовый набор пакетов в %LOCALAPPDATA%\WPIC\winget; null, если он ещё не скачан.</summary>
     public static string? FindPayload()
     {
-        var dir = Path.Combine(AppContext.BaseDirectory, PayloadDirName);
-        if (PackageFiles.All(f => File.Exists(Path.Combine(dir, f)))) return dir;
-        return ExtractEmbeddedPayload();
+        if (_cacheValid == true) return CacheDir;
+        var dir = CacheDir;
+        if (PayloadFiles.All(p =>
+            {
+                var path = Path.Combine(dir, p.File);
+                return File.Exists(path) && new FileInfo(path).Length == p.Size;
+            }))
+        {
+            _cacheValid = true;
+            return dir;
+        }
+        return null;
     }
 
-    private static string? _extractedCache;
-    private static readonly object ExtractLock = new();
-
-    private static string? ExtractEmbeddedPayload()
+    /// <summary>Скачивает пакеты winget (интернет обязателен) и устанавливает их.</summary>
+    public static async Task<bool> InstallAsync(IProgress<string>? log, CancellationToken ct = default)
     {
-        lock (ExtractLock)
+        var payload = await EnsurePayloadAsync(log, ct);
+        return payload != null && await InstallOfflineAsync(payload, log, ct);
+    }
+
+    public static async Task<string?> EnsurePayloadAsync(IProgress<string>? log, CancellationToken ct = default)
+    {
+        var payload = FindPayload();
+        if (payload != null) return payload;
+        var dir = CacheDir;
+        Directory.CreateDirectory(dir);
+        try
         {
-            if (_extractedCache != null) return _extractedCache;
-            var cache = Path.Combine(LogService.DataDirectory, PayloadDirName);
-            var assembly = Assembly.GetExecutingAssembly();
-            foreach (var (file, sha256) in EmbeddedPackages)
+            await DownloadAsync(VclibsUrl, Path.Combine(dir, PackageFiles[1]), log, ct);
+            Verify(dir, PayloadFiles[1]);
+            await DownloadAsync(UiXamlUrl, Path.Combine(dir, PackageFiles[2]), log, ct);
+            Verify(dir, PayloadFiles[2]);
+            log?.Report(L10n.T("winget.dl.bundle"));
+            var bundle = Path.Combine(Path.GetTempPath(), "wpic-winget-" + Guid.NewGuid().ToString("N") + ".msixbundle");
+            try
             {
-                var target = Path.Combine(cache, file);
-                if (File.Exists(target) && HashMatches(target, sha256)) continue;
-                using var source = assembly.GetManifestResourceStream("WPIC.Winget." + file);
-                if (source == null) return null;
-                Directory.CreateDirectory(cache);
-                var temp = target + ".tmp";
-                using (var output = File.Create(temp)) source.CopyTo(output);
-                if (!HashMatches(temp, sha256))
-                {
-                    File.Delete(temp);
-                    return null;
-                }
-                File.Move(temp, target, overwrite: true);
+                await DownloadAsync(BundleUrl, bundle, log, ct);
+                var seven = DriverPackService.FindExtractor();
+                var (extractCode, extractOut) = await RunToolAsync(
+                    seven, new[] { "e", "-y", "-o" + dir, bundle, PackageFiles[0] }, ct);
+                if (extractCode != 0)
+                    throw new InvalidOperationException(L10n.T("winget.dl.extractError", extractOut.Trim()));
             }
-            _extractedCache = cache;
-            return cache;
+            finally
+            {
+                try { File.Delete(bundle); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            }
+            Verify(dir, PayloadFiles[0]);
+            _cacheValid = true;
+            log?.Report(L10n.T("winget.dl.done"));
+            return dir;
+        }
+        catch
+        {
+            _cacheValid = null;
+            throw;
         }
     }
 
-    private static bool HashMatches(string path, string expected)
+    private static async Task DownloadAsync(string url, string dest, IProgress<string>? log, CancellationToken ct)
     {
-        using var stream = File.OpenRead(path);
-        return string.Equals(Convert.ToHexString(SHA256.HashData(stream)), expected, StringComparison.Ordinal);
+        log?.Report(L10n.T("winget.dl.file", Path.GetFileName(dest)));
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+                response.EnsureSuccessStatusCode();
+                var total = response.Content.Headers.ContentLength ?? 0;
+                await using var source = await response.Content.ReadAsStreamAsync(ct);
+                await using var target = File.Create(dest);
+                var buffer = new byte[81920];
+                long read = 0, nextReport = 0;
+                int chunk;
+                while ((chunk = await source.ReadAsync(buffer, ct)) > 0)
+                {
+                    await target.WriteAsync(buffer.AsMemory(0, chunk), ct);
+                    read += chunk;
+                    if (total > 0 && read >= nextReport)
+                    {
+                        nextReport = read + 8_000_000;
+                        log?.Report(L10n.T("winget.dl.progress", read / 1048576, total / 1048576));
+                    }
+                }
+                return;
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (attempt < 3)
+            {
+                log?.Report(L10n.T("winget.dl.retry", attempt, ex.Message));
+                await Task.Delay(2000, ct);
+            }
+        }
     }
+
+    private static void Verify(string dir, (string File, long Size, string Sha256) expected)
+    {
+        var path = Path.Combine(dir, expected.File);
+        if (!File.Exists(path)) throw new InvalidOperationException(L10n.T("winget.dl.verifyFailed", expected.File));
+        using var stream = File.OpenRead(path);
+        if (stream.Length != expected.Size ||
+            !string.Equals(Convert.ToHexString(SHA256.HashData(stream)), expected.Sha256, StringComparison.Ordinal))
+            throw new InvalidOperationException(L10n.T("winget.dl.verifyFailed", expected.File));
+    }
+
+    // ---------- Microsoft Store ----------
+
+    /// <summary>Установлен ли Microsoft Store (пакет Microsoft.WindowsStore).</summary>
+    public static async Task<bool> IsStoreInstalledAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            return (await RunPowerShellAsync(
+                "if (Get-AppxPackage -Name Microsoft.WindowsStore) { 'store-present' } else { 'store-missing' }", ct))
+                .Trim().EndsWith("store-present", StringComparison.Ordinal);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>Штатное восстановление Microsoft Store (`wsreset -i`, Windows 10 1809+): запускает установку,
+    /// система завершает её в фоне — требуется интернет.</summary>
+    public static async Task<bool> RestoreStoreAsync(IProgress<string>? log, CancellationToken ct = default)
+    {
+        log?.Report(L10n.T("winget.store.restoring"));
+        var (code, output) = await RunToolAsync(
+            Path.Combine(Environment.SystemDirectory, "wsreset.exe"), new[] { "-i" }, ct);
+        if (code == 0)
+        {
+            log?.Report(L10n.T("winget.store.triggered"));
+            return true;
+        }
+        log?.Report(L10n.T("winget.store.failed", code, output.Trim()));
+        return false;
+    }
+
+    // ---------- обновление winget ----------
+
+    /// <summary>Обновляет winget штатным механизмом: `winget upgrade Microsoft.AppInstaller`.</summary>
+    public static async Task<bool> SelfUpdateAsync(IProgress<string>? log, CancellationToken ct = default)
+    {
+        log?.Report(L10n.T("winget.update.start"));
+        await WingetService.RunAsync(
+            "upgrade Microsoft.AppInstaller -e --silent --accept-package-agreements --accept-source-agreements --disable-interactivity",
+            log, ct);
+        var available = await WingetService.IsAvailableAsync();
+        log?.Report(available ? L10n.T("winget.update.done") : L10n.T("winget.update.failed"));
+        return available;
+    }
+
+    // ---------- установка из готового набора ----------
 
     public static string BuildInstallScript(string payloadDir)
     {
@@ -140,6 +273,32 @@ public static class WingetBootstrapService
                  await WingetService.IsAvailableAsync();
         log?.Report(ok ? L10n.T("winget.boot.done") : L10n.T("winget.boot.failed", process.ExitCode));
         return ok;
+    }
+
+    private static async Task<string> RunPowerShellAsync(string script, CancellationToken ct)
+    {
+        var encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+        var (_, output) = await RunToolAsync(
+            Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"),
+            new[] { "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded }, ct);
+        return output;
+    }
+
+    private static async Task<(int Code, string Output)> RunToolAsync(string exe, string[] args, CancellationToken ct)
+    {
+        var psi = new ProcessStartInfo(exe)
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        foreach (var arg in args) psi.ArgumentList.Add(arg);
+        using var process = Process.Start(psi)!;
+        var stdout = process.StandardOutput.ReadToEndAsync(ct);
+        var stderr = process.StandardError.ReadToEndAsync(ct);
+        await process.WaitForExitAsync(ct);
+        return (process.ExitCode, await stdout + await stderr);
     }
 
     private static string Escape(string path) => path.Replace("'", "''");

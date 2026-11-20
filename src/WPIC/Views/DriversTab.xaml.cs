@@ -13,6 +13,7 @@ public partial class DriversTab : UserControl
     private DriverPackIndex? _index;
     private bool _netBusy;
     private bool _loadingPack;
+    private bool _backupBusy;
 
     private sealed class NetDeviceVm : ObservableObject
     {
@@ -138,9 +139,20 @@ public partial class DriversTab : UserControl
         await UsePackAsync(dir);
     }
 
-    private async void BtnNetFix_Click(object sender, RoutedEventArgs e)
+    private async void BtnNetFix_Click(object sender, RoutedEventArgs e) => await FixNetAsync();
+
+    /// <summary>Подбор и установка драйверов для сетевых карт из пака (кнопка вкладки и панель окружения).</summary>
+    public async Task FixNetAsync()
     {
-        if (_netBusy || _loadingPack || _packDir == null || _index == null) return;
+        if (_netBusy || _loadingPack) return;
+        if (_packDir == null || _index == null) await RefreshPackAsync();
+        if (_packDir == null || _index == null)
+        {
+            ThemedMessageBox.Show(L10n.T(DriverPackService.HasBundledPack
+                ? "drivers.offline.packMissing" : "drivers.offline.packMissingPortable"), L10n.T("drivers.err.title"),
+                MessageBoxButton.OK, MessageBoxImage.Warning, Window.GetWindow(this));
+            return;
+        }
         if (!DriverPackService.IsAdmin)
         {
             ThemedMessageBox.Show(L10n.T("drivers.offline.notAdmin"), L10n.T("drivers.err.title"),
@@ -153,8 +165,8 @@ public partial class DriversTab : UserControl
         TxtOfflineStatus.Text = L10n.T("drivers.offline.working");
         try
         {
-            _index ??= await LoadIndexAsync(_packDir!);
-            var index = _index;
+            var index = _index!;
+            var packDir = _packDir!;
             var problems = await Task.Run(() => DriverPackService.FindProblemNetDevices(
                 DriverPackService.GetNetworkDevices(), index, DriverPackService.IsWindows11));
             if (problems.Count == 0)
@@ -277,6 +289,127 @@ public partial class DriversTab : UserControl
         catch (Exception ex)
         {
             LogService.Log(L10n.T("drivers.log.wuError", ex.Message));
+        }
+    }
+
+    // ---------- резервная копия драйверов ----------
+
+    private void SetBackupBusy(bool busy)
+    {
+        _backupBusy = busy;
+        BtnDriversExport.IsEnabled = !busy;
+        BtnDriversRestore.IsEnabled = !busy;
+        ChkExport7z.IsEnabled = !busy;
+    }
+
+    private async void BtnDriversExport_Click(object sender, RoutedEventArgs e)
+    {
+        if (_backupBusy) return;
+        if (!DriverPackService.IsAdmin)
+        {
+            ThemedMessageBox.Show(L10n.T("drivers.backup.notAdmin"), L10n.T("drivers.err.title"),
+                MessageBoxButton.OK, MessageBoxImage.Warning, Window.GetWindow(this));
+            return;
+        }
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = L10n.T("drivers.backup.pickFolder") };
+        if (dialog.ShowDialog() != true) return;
+        var dest = Path.Combine(dialog.FolderName, "DriverBackup_" + DateTime.Now.ToString("yyyyMMdd_HHmm"));
+        SetBackupBusy(true);
+        TxtBackupStatus.Text = L10n.T("drivers.backup.exporting");
+        try
+        {
+            var code = await DriverPackService.ExportDriversAsync(dest, new Progress<string>(LogService.Log));
+            if (code != 0)
+            {
+                TxtBackupStatus.Text = L10n.T("drivers.backup.exportFailed", code);
+                ThemedMessageBox.Show(TxtBackupStatus.Text, L10n.T("drivers.backup.title"),
+                    MessageBoxButton.OK, MessageBoxImage.Warning, Window.GetWindow(this));
+                return;
+            }
+            var count = await Task.Run(() => Directory.EnumerateFiles(dest, "*.inf", SearchOption.AllDirectories).Count());
+            var message = L10n.T("drivers.backup.exportDone", count, dest);
+            TxtBackupStatus.Text = L10n.T("drivers.backup.exportDone", count, dest);
+            if (ChkExport7z.IsChecked == true)
+            {
+                TxtBackupStatus.Text = L10n.T("drivers.backup.compressing");
+                var archive = dest + ".7z";
+                var seven = DriverPackService.FindExtractor();
+                var (zipCode, zipOut) = await DriverPackService.RunToolAsync(
+                    seven, new[] { "a", "-t7z", "-mx=5", "-y", archive, dest }, CancellationToken.None);
+                if (zipCode == 0)
+                {
+                    var size = new FileInfo(archive).Length / 1048576.0;
+                    message += "\n\n" + L10n.T("drivers.backup.compressDone", archive, size);
+                    TxtBackupStatus.Text = L10n.T("drivers.backup.compressDone", archive, size);
+                }
+                else LogService.Log(zipOut.Trim());
+            }
+            LogService.Log(message);
+            ThemedMessageBox.Show(message, L10n.T("drivers.backup.title"),
+                MessageBoxButton.OK, MessageBoxImage.Information, Window.GetWindow(this));
+        }
+        catch (Exception ex)
+        {
+            TxtBackupStatus.Text = ex.Message;
+            LogService.Log(ex.Message);
+        }
+        finally { SetBackupBusy(false); }
+    }
+
+    private async void BtnDriversRestore_Click(object sender, RoutedEventArgs e)
+    {
+        if (_backupBusy) return;
+        if (!DriverPackService.IsAdmin)
+        {
+            ThemedMessageBox.Show(L10n.T("drivers.backup.notAdmin"), L10n.T("drivers.err.title"),
+                MessageBoxButton.OK, MessageBoxImage.Warning, Window.GetWindow(this));
+            return;
+        }
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = L10n.T("drivers.backup.pickFile"), Filter = L10n.T("drivers.backup.filter") };
+        if (dialog.ShowDialog() != true) return;
+        SetBackupBusy(true);
+        TxtBackupStatus.Text = L10n.T("drivers.backup.restoring");
+        string? temp = null;
+        try
+        {
+            var source = dialog.FileName;
+            var dir = Path.GetDirectoryName(source)!;
+            if (string.Equals(Path.GetExtension(source), ".7z", StringComparison.OrdinalIgnoreCase))
+            {
+                var seven = DriverPackService.FindExtractor();
+                temp = Path.Combine(Path.GetTempPath(), "wpic-driver-restore-" + Guid.NewGuid().ToString("N"));
+                var (extractCode, extractOut) = await DriverPackService.RunToolAsync(
+                    seven, new[] { "x", "-y", "-o" + temp, source }, CancellationToken.None);
+                if (extractCode != 0)
+                    throw new InvalidOperationException(L10n.T("drivers.offline.extractError", extractOut.Trim()));
+                dir = temp;
+            }
+            else if (!string.Equals(Path.GetExtension(source), ".inf", StringComparison.OrdinalIgnoreCase))
+            {
+                ThemedMessageBox.Show(L10n.T("drivers.backup.badSource"), L10n.T("drivers.backup.title"),
+                    MessageBoxButton.OK, MessageBoxImage.Warning, Window.GetWindow(this));
+                return;
+            }
+            var code = await DriverPackService.RestoreDriversAsync(dir, new Progress<string>(LogService.Log));
+            TxtBackupStatus.Text = L10n.T(code == 0 ? "drivers.backup.restoreDone" : "drivers.backup.restoreFailed", code);
+            LogService.Log(TxtBackupStatus.Text);
+            ThemedMessageBox.Show(TxtBackupStatus.Text, L10n.T("drivers.backup.title"), MessageBoxButton.OK,
+                code == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning, Window.GetWindow(this));
+        }
+        catch (Exception ex)
+        {
+            TxtBackupStatus.Text = ex.Message;
+            LogService.Log(ex.Message);
+        }
+        finally
+        {
+            if (temp != null)
+            {
+                try { Directory.Delete(temp, true); }
+                catch (IOException ex) { LogService.Log(ex.Message); }
+                catch (UnauthorizedAccessException ex) { LogService.Log(ex.Message); }
+            }
+            SetBackupBusy(false);
         }
     }
 }

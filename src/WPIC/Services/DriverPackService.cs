@@ -195,6 +195,31 @@ public static class DriverPackService
         }
     }
 
+    /// <summary>Экспорт всех сторонних (OEM) драйверов в папку: pnputil /export-driver * папка. Код 0 — успех.</summary>
+    public static async Task<int> ExportDriversAsync(string destDir, IProgress<string>? log, CancellationToken ct = default)
+    {
+        Directory.CreateDirectory(destDir);
+        log?.Report(L10n.T("drivers.backup.exporting"));
+        var (code, output) = await RunAsync(Path.Combine(Environment.SystemDirectory, "pnputil.exe"),
+            new[] { "/export-driver", "*", destDir }, ct);
+        if (output.Trim().Length > 0) log?.Report(output.Trim());
+        return code;
+    }
+
+    /// <summary>Восстановление драйверов из папки: pnputil /add-driver папка\*.inf /subdirs /install.</summary>
+    public static async Task<int> RestoreDriversAsync(string dir, IProgress<string>? log, CancellationToken ct = default)
+    {
+        log?.Report(L10n.T("drivers.backup.restoring"));
+        var (code, output) = await RunAsync(Path.Combine(Environment.SystemDirectory, "pnputil.exe"),
+            new[] { "/add-driver", Path.Combine(dir, "*.inf"), "/subdirs", "/install" }, ct);
+        if (output.Trim().Length > 0) log?.Report(output.Trim());
+        return code;
+    }
+
+    /// <summary>Запуск внешней утилиты (7za) со сбором вывода.</summary>
+    public static Task<(int Code, string Output)> RunToolAsync(string exe, string[] args, CancellationToken ct = default) =>
+        RunAsync(exe, args, ct);
+
     private static async Task<(int Code, string Output)> RunAsync(string exe, string[] args, CancellationToken ct)
     {
         var psi = new ProcessStartInfo(exe)
