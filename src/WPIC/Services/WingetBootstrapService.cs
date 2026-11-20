@@ -149,13 +149,17 @@ public static class WingetBootstrapService
     // ---------- Microsoft Store ----------
 
     /// <summary>Установлен ли Microsoft Store (пакет Microsoft.WindowsStore).</summary>
+    /// <summary>Магазин может быть зарегистрирован на другого пользователя, а приложение всегда elevated:
+    /// сначала -AllUsers, при ошибке — per-user. Итог кодируется кодом выхода, шум stderr не влияет.</summary>
     public static async Task<bool> IsStoreInstalledAsync(CancellationToken ct = default)
     {
         try
         {
-            return (await RunPowerShellAsync(
-                "if (Get-AppxPackage -Name Microsoft.WindowsStore) { 'store-present' } else { 'store-missing' }", ct))
-                .Trim().EndsWith("store-present", StringComparison.Ordinal);
+            const string script = "$found=$false; " +
+                "try { if (Get-AppxPackage -AllUsers -Name Microsoft.WindowsStore -ErrorAction Stop) { $found=$true } } catch { } " +
+                "if (-not $found) { try { if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction Stop) { $found=$true } } catch { } } " +
+                "if ($found) { exit 0 } else { exit 1 }";
+            return (await RunPowerShellAsync(script, ct)).Code == 0;
         }
         catch
         {
@@ -275,13 +279,12 @@ public static class WingetBootstrapService
         return ok;
     }
 
-    private static async Task<string> RunPowerShellAsync(string script, CancellationToken ct)
+    private static async Task<(int Code, string Output)> RunPowerShellAsync(string script, CancellationToken ct)
     {
         var encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
-        var (_, output) = await RunToolAsync(
+        return await RunToolAsync(
             Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"),
             new[] { "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded }, ct);
-        return output;
     }
 
     private static async Task<(int Code, string Output)> RunToolAsync(string exe, string[] args, CancellationToken ct)
