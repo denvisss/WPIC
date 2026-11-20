@@ -3,6 +3,7 @@ using System.IO;
 using System.Management;
 using System.Security.Principal;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WPIC.Services;
@@ -15,6 +16,10 @@ public sealed class NetDevice
     public int ErrorCode { get; set; }
     public bool IsNetClass { get; set; }
 }
+
+public enum DriverExportPhase { Drivers, Packing }
+
+public sealed record DriverExportProgress(DriverExportPhase Phase, int Done, int Total);
 
 /// <summary>Офлайн-набор сетевых драйверов: поиск пакета, подбор по hardware ID, установка через pnputil.</summary>
 public static class DriverPackService
@@ -195,16 +200,35 @@ public static class DriverPackService
         }
     }
 
-    /// <summary>Экспорт всех сторонних (OEM) драйверов в папку: pnputil /export-driver * папка. Код 0 — успех.</summary>
-    public static async Task<int> ExportDriversAsync(string destDir, IProgress<string>? log, CancellationToken ct = default)
+    /// <summary>Экспорт всех сторонних (OEM) драйверов в папку: pnputil /export-driver * папка. Код 0 — успех.
+    /// Прогресс считается по строкам вывода pnputil (имена oemNN.inf не зависят от языка системы);
+    /// общее число берётся из /enum-drivers, 0 означает «неизвестно» (полоса будет неопределённой).</summary>
+    public static async Task<int> ExportDriversAsync(string destDir, IProgress<string>? log,
+        IProgress<DriverExportProgress>? progress = null, CancellationToken ct = default)
     {
         Directory.CreateDirectory(destDir);
         log?.Report(L10n.T("drivers.backup.exporting"));
-        var (code, output) = await RunAsync(Path.Combine(Environment.SystemDirectory, "pnputil.exe"),
-            new[] { "/export-driver", "*", destDir }, ct);
+        var pnputil = Path.Combine(Environment.SystemDirectory, "pnputil.exe");
+        var (enumCode, enumOut) = await RunAsync(pnputil, new[] { "/enum-drivers" }, ct);
+        var total = enumCode == 0 ? CountOemInfs(enumOut) : 0;
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var (code, output) = await RunAsync(pnputil, new[] { "/export-driver", "*", destDir }, ct, text =>
+        {
+            var before = seen.Count;
+            foreach (Match m in OemInf.Matches(text)) seen.Add(m.Value);
+            if (seen.Count > before)
+                progress?.Report(new DriverExportProgress(DriverExportPhase.Drivers, seen.Count, total));
+        });
+        var done = Math.Min(seen.Count, total > 0 ? total : seen.Count);
+        progress?.Report(new DriverExportProgress(DriverExportPhase.Drivers, done, total > 0 ? total : done));
         if (output.Trim().Length > 0) log?.Report(output.Trim());
         return code;
     }
+
+    private static readonly Regex OemInf = new(@"\boem\d+\.inf\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static int CountOemInfs(string text) =>
+        OemInf.Matches(text).Select(m => m.Value).ToHashSet(StringComparer.OrdinalIgnoreCase).Count;
 
     /// <summary>Восстановление драйверов из папки: pnputil /add-driver папка\*.inf /subdirs /install.</summary>
     public static async Task<int> RestoreDriversAsync(string dir, IProgress<string>? log, CancellationToken ct = default)
@@ -217,10 +241,10 @@ public static class DriverPackService
     }
 
     /// <summary>Запуск внешней утилиты (7za) со сбором вывода.</summary>
-    public static Task<(int Code, string Output)> RunToolAsync(string exe, string[] args, CancellationToken ct = default) =>
-        RunAsync(exe, args, ct);
+    public static Task<(int Code, string Output)> RunToolAsync(string exe, string[] args, CancellationToken ct = default, Action<string>? line = null) =>
+        RunAsync(exe, args, ct, line);
 
-    private static async Task<(int Code, string Output)> RunAsync(string exe, string[] args, CancellationToken ct)
+    private static async Task<(int Code, string Output)> RunAsync(string exe, string[] args, CancellationToken ct, Action<string>? line = null)
     {
         var psi = new ProcessStartInfo(exe)
         {
@@ -235,9 +259,20 @@ public static class DriverPackService
         {
             try { process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
         });
-        var stdout = process.StandardOutput.ReadToEndAsync(ct);
-        var stderr = process.StandardError.ReadToEndAsync(ct);
+        var output = new StringBuilder();
+        var stdout = ReadLinesAsync(process.StandardOutput, output, line, ct);
+        var stderr = ReadLinesAsync(process.StandardError, output, line, ct);
         await process.WaitForExitAsync(ct);
-        return (process.ExitCode, await stdout + await stderr);
+        await Task.WhenAll(stdout, stderr);
+        return (process.ExitCode, output.ToString());
+    }
+
+    private static async Task ReadLinesAsync(StreamReader reader, StringBuilder output, Action<string>? line, CancellationToken ct)
+    {
+        while (await reader.ReadLineAsync(ct) is { } text)
+        {
+            lock (output) output.AppendLine(text);
+            line?.Invoke(text);
+        }
     }
 }

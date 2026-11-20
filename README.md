@@ -23,10 +23,10 @@
 
 WPIC prepares a freshly installed Windows 10/11 (x64) for real use: it brings the network up, installs the software you select and tunes the system — every step offline-capable, logged and reversible.
 
-- 🖧 **Offline drivers** — detects NIC/Wi-Fi adapters without a driver, matches hardware IDs against a curated pack, installs the newest matching version via `pnputil`; third-party drivers can be **exported** to a folder (optionally packed into a single 7z) and **restored** after reinstalling Windows.
+- 🖧 **Offline drivers** — detects NIC/Wi-Fi adapters without a driver, matches hardware IDs against a curated pack, installs the newest matching version via `pnputil`; third-party drivers can be **exported** to a folder (optionally packed into a single 7z) and **restored** after reinstalling Windows — the export shows a live progress bar with the percentage and estimated time remaining.
 - 🧭 **Environment panel** — a bar above the tabs shows the state of winget, Microsoft Store and the NIC driver, each with its own button: install winget with or without the Store (payload is downloaded from official Microsoft sources and verified by SHA-256), restore the Store, update winget, or match a NIC driver from a pack.
-- 🗂 **App catalog & winget search** — the curated catalog of 49 popular apps in 7 sections opens automatically, but that is only a starting point: the built-in search installs **any** package from the entire winget repository. Version badges refresh from winget at startup; multi-select, one install button.
-- 🛠 **65 system tweaks** — six collapsible icon categories, per-category *Select all*, risk dots, automatic registry snapshot, one-click undo.
+- 🗂 **App catalog & winget search** — the *Installing apps* tab opens a curated catalog of 49 popular apps in 7 sections with real app icons, version chips and colored install status; *Popular* is pinned at the top and every section collapses with a click. That is only a starting point: the built-in search installs **any** package from the entire winget repository. Versions and install statuses refresh from winget at startup; multi-select, one install button.
+- 🛠 **65 system tweaks** — six collapsible icon categories, collapsed by default, per-category *Select all*, risk dots, automatic registry snapshot, one-click undo.
 - 🧹 **Built-in app removal** — curated UWP catalog with real icons, install dates and per-app removal risk; verified removal, optional provisioned cleanup, restore from the Windows image.
 - ⬆️ **Self-update** — GitHub releases are checked at startup; the update installs in place from Settings.
 - 🌐 **Bilingual UI** (EN/RU), dark/light themes, full activity log on screen and on disk.
@@ -102,7 +102,7 @@ dotnet test tests\WPIC.Tests\WPIC.Tests.csproj
 
 ## ✅ Verification
 
-156 xUnit tests (catalog contract, winget parsing, tweak engine, driver index, localization) plus offscreen WPF harnesses that drive the real views: catalog rendering and batch install, tweak expanders/select-all/apply/undo on an isolated registry key, winget banner states, pack drag & drop and index-in-archive loading.
+156 xUnit tests (catalog contract, winget parsing, tweak engine, driver index, localization) plus offscreen WPF harnesses that drive the real views: catalog rendering and batch install, tweak expanders/select-all/apply/undo on an isolated registry key, winget banner states, pack drag & drop and index-in-archive loading, driver export progress panel states.
 
 ## 📜 License
 
@@ -122,10 +122,10 @@ The code is licensed under the [MIT License](LICENSE) — copying is permitted w
 
 WPIC готовит чистую Windows 10/11 (x64) к работе: поднимает сеть, устанавливает выбранные приложения и настраивает систему — каждый шаг работает офлайн, пишется в журнал и откатывается.
 
-- 🖧 **Офлайн-драйверы** — находит NIC/Wi-Fi без драйвера, подбирает по ID оборудования из курируемого пака, ставит новейшую подходящую версию через `pnputil`; сторонние драйверы можно **экспортировать** в папку (опционально в один 7z) и **восстановить** после переустановки Windows.
+- 🖧 **Офлайн-драйверы** — находит NIC/Wi-Fi без драйвера, подбирает по ID оборудования из курируемого пака, ставит новейшую подходящую версию через `pnputil`; сторонние драйверы можно **экспортировать** в папку (опционально в один 7z) и **восстановить** после переустановки Windows — экспорт показывает живую полосу прогресса с процентами и примерным временем до конца.
 - 🧭 **Панель окружения** — полоса над вкладками показывает состояние winget, Microsoft Store и драйвера сетевой карты; у каждого свой пункт: установка winget с магазином или без (пак скачивается из официальных источников Microsoft и проверяется по SHA-256), восстановление магазина, обновление winget или подбор драйвера NIC из пака.
-- 🗂 **Каталог и поиск winget** — при запуске автоматически открывается курируемый каталог из 49 популярных приложений в 7 разделах, но это только отправная точка: встроенный поиск устанавливает **любое** приложение из всего репозитория winget. Бейджи версий обновляются из winget при запуске; мультивыбор, одна кнопка установки.
-- 🛠 **65 твиков** — шесть раскрываемых категорий с иконками, «выбрать все» по категории, точки риска, снимок реестра до применения, откат одной кнопкой.
+- 🗂 **Каталог и поиск winget** — вкладка «Установка приложений» открывает курируемый каталог из 49 популярных приложений в 7 разделах с настоящими иконками, чипами версий и цветным статусом установки; «Популярное» закреплено сверху, любой раздел сворачивается кликом. Это только отправная точка: встроенный поиск устанавливает **любое** приложение из всего репозитория winget. Версии и статусы установки обновляются из winget при каждом запуске; мультивыбор, одна кнопка установки.
+- 🛠 **65 твиков** — шесть раскрываемых категорий с иконками, свёрнутые по умолчанию, «выбрать все» по категории, точки риска, снимок реестра до применения, откат одной кнопкой.
 - 🧹 **Удаление встроенных приложений** — курируемый каталог UWP с настоящими иконками, датами установки и риском удаления; проверенное удаление, опциональная чистка provisioned, восстановление из образа Windows.
 - ⬆️ **Самообновление** — проверка релизов GitHub при запуске, установка поверх из настроек.
 - 🌐 **Интерфейс** EN/RU, тёмная и светлая темы, полный журнал операций.
@@ -201,7 +201,7 @@ dotnet test tests\WPIC.Tests\WPIC.Tests.csproj
 
 ## ✅ Проверка
 
-156 тестов xUnit (контракт каталога, парсинг winget, движок твиков, индекс драйверов, локализация) плюс офскрин-харнесы на реальных вкладках: каталог и пакетная установка, категории-раскрывашки твиков, «выбрать все», применение/откат на изолированном ключе реестра, баннер winget, drag & drop пака и чтение индекса из архива.
+156 тестов xUnit (контракт каталога, парсинг winget, движок твиков, индекс драйверов, локализация) плюс офскрин-харнесы на реальных вкладках: каталог и пакетная установка, категории-раскрывашки твиков, «выбрать все», применение/откат на изолированном ключе реестра, баннер winget, drag & drop пака, чтение индекса из архива и состояния панели прогресса экспорта драйверов.
 
 ## 📜 Лицензия
 

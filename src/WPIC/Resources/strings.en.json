@@ -10,7 +10,7 @@
   "main.log.unhandled": "UNHANDLED ERROR: {0}",
   "main.log.openFolder": "Open log folder",
 
-  "tab.apps": "Apps",
+  "tab.apps": "Install apps",
   "tab.bloat": "Built-in app removal",
   "tab.tweaks": "System tweaks",
   "tab.drivers": "Drivers",
@@ -390,6 +390,8 @@
   "drivers.backup.pickFile": "Select a driver backup — .7z archive or .inf file",
   "drivers.backup.badSource": "The selected location contains no driver files (.inf or a .7z archive).",
   "drivers.backup.exportFailed": "Driver export failed (code {0}).",
+  "drivers.backup.progress": "Exporting drivers: {0} of {1}",
+  "drivers.backup.eta": "~{0} left",
   "drivers.backup.filter": "Driver backup (.7z)|*.7z|Driver files (.inf)|*.inf|All files|*.*",
   "winget.boot.available": "winget is unavailable. Install it here or from the environment panel above the tabs.",
   "winget.ui.notInstalled": "Winget is not installed",

@@ -10,7 +10,7 @@
   "main.log.unhandled": "НЕОБРАБОТАННАЯ ОШИБКА: {0}",
   "main.log.openFolder": "Открыть папку журнала",
 
-  "tab.apps": "Приложения",
+  "tab.apps": "Установка приложений",
   "tab.bloat": "Удаление встроенных приложений",
   "tab.tweaks": "Твики системы",
   "tab.drivers": "Драйверы",
@@ -260,6 +260,8 @@
   "drivers.backup.pickFile": "Выберите копию драйверов — архив .7z или файл .inf",
   "drivers.backup.badSource": "В выбранном месте нет файлов драйверов (.inf или архив .7z).",
   "drivers.backup.exportFailed": "Не удалось экспортировать драйверы (код {0}).",
+  "drivers.backup.progress": "Экспорт драйверов: {0} из {1}",
+  "drivers.backup.eta": "осталось ~{0}",
   "drivers.backup.filter": "Копия драйверов (.7z)|*.7z|Файлы драйверов (.inf)|*.inf|Все файлы|*.*",
   "winget.boot.available": "winget недоступен. Установите его здесь или на панели окружения над вкладками.",
   "winget.ui.notInstalled": "Winget не установлен",

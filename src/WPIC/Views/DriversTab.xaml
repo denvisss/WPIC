@@ -105,6 +105,13 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
+                <StackPanel x:Name="PanelBackupProgress" Margin="0,10,0,0" Visibility="Collapsed">
+                    <ProgressBar x:Name="BarBackup" Height="6" Minimum="0" Maximum="100"
+                                 Foreground="{DynamicResource Brush.Accent}" Background="{DynamicResource Brush.FieldBg}"
+                                 BorderThickness="0"/>
+                    <TextBlock x:Name="TxtBackupProgress" Margin="0,6,0,0" FontSize="12"
+                               Foreground="{DynamicResource Brush.TextSecondary}"/>
+                </StackPanel>
                 <TextBlock x:Name="TxtBackupStatus" Margin="0,8,0,0" FontSize="12"
                            Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap"/>
             </StackPanel>

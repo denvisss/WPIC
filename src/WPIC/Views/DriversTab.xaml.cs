@@ -302,6 +302,15 @@ public partial class DriversTab : UserControl
         ChkExport7z.IsEnabled = !busy;
     }
 
+    /// <summary>Оценка оставшегося времени по линейному темпу: часы, если есть, иначе минуты.</summary>
+    private static string EtaClock(TimeSpan elapsed, int done, int total)
+    {
+        var eta = TimeSpan.FromSeconds(elapsed.TotalSeconds * (total - done) / Math.Max(done, 1));
+        return (int)eta.TotalHours > 0
+            ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1:00}:{2:00}", (int)eta.TotalHours, eta.Minutes, eta.Seconds)
+            : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1:00}", (int)eta.TotalMinutes, eta.Seconds);
+    }
+
     private async void BtnDriversExport_Click(object sender, RoutedEventArgs e)
     {
         if (_backupBusy) return;
@@ -315,10 +324,35 @@ public partial class DriversTab : UserControl
         if (dialog.ShowDialog() != true) return;
         var dest = Path.Combine(dialog.FolderName, "DriverBackup_" + DateTime.Now.ToString("yyyyMMdd_HHmm"));
         SetBackupBusy(true);
-        TxtBackupStatus.Text = L10n.T("drivers.backup.exporting");
+        PanelBackupProgress.Visibility = Visibility.Visible;
+        BarBackup.IsIndeterminate = true;
+        BarBackup.Value = 0;
+        TxtBackupProgress.Text = L10n.T("drivers.backup.exporting");
+        var stopwatch = Stopwatch.StartNew();
+        IProgress<DriverExportProgress> ui = new Progress<DriverExportProgress>(p =>
+        {
+            if (p.Phase == DriverExportPhase.Packing)
+            {
+                BarBackup.IsIndeterminate = true;
+                TxtBackupProgress.Text = L10n.T("drivers.backup.compressing");
+                return;
+            }
+            if (p.Total <= 0)
+            {
+                BarBackup.IsIndeterminate = true;
+                TxtBackupProgress.Text = L10n.T("drivers.backup.exporting");
+                return;
+            }
+            BarBackup.IsIndeterminate = false;
+            BarBackup.Value = Math.Min(100, p.Done * 100.0 / p.Total);
+            var text = L10n.T("drivers.backup.progress", Math.Min(p.Done, p.Total), p.Total);
+            if (p.Done > 0 && p.Done < p.Total)
+                text += " · " + L10n.T("drivers.backup.eta", EtaClock(stopwatch.Elapsed, p.Done, p.Total));
+            TxtBackupProgress.Text = text;
+        });
         try
         {
-            var code = await DriverPackService.ExportDriversAsync(dest, new Progress<string>(LogService.Log));
+            var code = await DriverPackService.ExportDriversAsync(dest, new Progress<string>(LogService.Log), ui);
             if (code != 0)
             {
                 TxtBackupStatus.Text = L10n.T("drivers.backup.exportFailed", code);
@@ -326,12 +360,14 @@ public partial class DriversTab : UserControl
                     MessageBoxButton.OK, MessageBoxImage.Warning, Window.GetWindow(this));
                 return;
             }
+            BarBackup.Value = 100;
             var count = await Task.Run(() => Directory.EnumerateFiles(dest, "*.inf", SearchOption.AllDirectories).Count());
             var message = L10n.T("drivers.backup.exportDone", count, dest);
             TxtBackupStatus.Text = L10n.T("drivers.backup.exportDone", count, dest);
             if (ChkExport7z.IsChecked == true)
             {
                 TxtBackupStatus.Text = L10n.T("drivers.backup.compressing");
+                ui.Report(new DriverExportProgress(DriverExportPhase.Packing, 0, 0));
                 var archive = dest + ".7z";
                 var seven = DriverPackService.FindExtractor();
                 var (zipCode, zipOut) = await DriverPackService.RunToolAsync(
@@ -353,7 +389,11 @@ public partial class DriversTab : UserControl
             TxtBackupStatus.Text = ex.Message;
             LogService.Log(ex.Message);
         }
-        finally { SetBackupBusy(false); }
+        finally
+        {
+            PanelBackupProgress.Visibility = Visibility.Collapsed;
+            SetBackupBusy(false);
+        }
     }
 
     private async void BtnDriversRestore_Click(object sender, RoutedEventArgs e)
