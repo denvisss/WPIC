@@ -259,26 +259,6 @@
         </Setter>
     </Style>
 
-    <!-- ================= Группы (карточки) ================= -->
-    <Style TargetType="GroupBox">
-        <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="GroupBox">
-                    <Border Background="{StaticResource Brush.Surface}"
-                            BorderBrush="{StaticResource Brush.Border}"
-                            BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,0,0,12">
-                        <StackPanel>
-                            <TextBlock Text="{TemplateBinding Header}" FontSize="14" FontWeight="SemiBold"
-                                       Foreground="{StaticResource Brush.Text}" Margin="0,0,0,8"/>
-                            <ContentPresenter/>
-                        </StackPanel>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- ================= Поля ввода ================= -->
     <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource Brush.FieldBg}"/>

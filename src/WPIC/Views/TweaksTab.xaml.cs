@@ -125,7 +125,7 @@ public partial class TweaksTab : UserControl
             };
             expander.Expanded += (_, _) => _expanded[category] = true;
             expander.Collapsed += (_, _) => _expanded[category] = false;
-            expander.IsExpanded = !_expanded.TryGetValue(category, out var open) || open;
+            expander.IsExpanded = _expanded.TryGetValue(category, out var open) && open;
             PanelGroups.Children.Add(expander);
         }
         UpdateSelectionUi();

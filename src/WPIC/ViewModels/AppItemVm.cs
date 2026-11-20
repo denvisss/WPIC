@@ -1,6 +1,7 @@
 namespace WPIC.ViewModels;
 
 using System.Windows;
+using System.Windows.Media;
 using WPIC.Models;
 using WPIC.Services;
 
@@ -36,10 +37,26 @@ public class AppItemVm : ObservableObject
 
     public Visibility VersionVisibility => _versionRaw.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+    public string TileLetter => AppTile.Letter(Name);
+    public Brush TileBrush => AppTile.Brush(Pkg.Id);
+
+    private ImageSource? _icon;
+    public ImageSource? Icon
+    {
+        get => _icon;
+        set
+        {
+            if (Set(ref _icon, value)) Raise(nameof(IconVisibility));
+        }
+    }
+
+    public Visibility IconVisibility => _icon != null ? Visibility.Visible : Visibility.Collapsed;
+
     public void RefreshLocalization()
     {
         Raise(nameof(Description));
         Raise(nameof(VersionLabel));
+        Raise(nameof(TileLetter));
     }
 
     private string _status = "";
@@ -64,4 +81,4 @@ public class AppItemVm : ObservableObject
     }
 }
 
-public sealed record CategoryGroup(string Name, IReadOnlyList<AppItemVm> Apps);
+public sealed record CategoryGroup(string Key, string Name, IReadOnlyList<AppItemVm> Apps);

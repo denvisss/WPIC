@@ -3,31 +3,43 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:WPIC.Services">
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Margin="8">
-            <WrapPanel>
-                <Button x:Name="BtnRemove" Style="{DynamicResource PrimaryButton}" Margin="0,0,8,8" Content="{loc:L10n bloat.remove}" Click="BtnRemove_Click"/>
-                <Button x:Name="BtnRestore" Content="{loc:L10n bloat.restore}" Margin="0,0,8,8" Click="BtnRestore_Click"/>
-                <Button x:Name="BtnRefresh" Content="{loc:L10n bloat.refresh}" Margin="0,0,8,8" Click="BtnRefresh_Click"/>
-                <Button x:Name="BtnRestorePoint" Content="{loc:L10n tweaks.restorePoint}" Margin="0,0,8,8" Click="BtnRestorePoint_Click"/>
-            </WrapPanel>
-            <Grid Margin="0,2,0,6">
-                <TextBox x:Name="TxtSearch" Padding="10,7" FontSize="13" TextChanged="TxtSearch_TextChanged"/>
-                <TextBlock x:Name="TxtSearchHint" Text="{loc:L10n bloat.searchHint}"
-                           Foreground="{DynamicResource Brush.TextSecondary}" Margin="12,0,0,0"
-                           VerticalAlignment="Center" IsHitTestVisible="False"/>
-            </Grid>
-            <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
-                <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Success}" VerticalAlignment="Center"/>
-                <TextBlock Text="{loc:L10n tweaks.risk.green}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
-                <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Warning}" VerticalAlignment="Center"/>
-                <TextBlock Text="{loc:L10n tweaks.risk.yellow}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
-                <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Danger}" VerticalAlignment="Center"/>
-                <TextBlock Text="{loc:L10n tweaks.risk.red}" Margin="5,0,0,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+        <Border DockPanel.Dock="Top" Margin="12,10,12,10" Padding="14" CornerRadius="10"
+                Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Path Width="18" Height="18" Stretch="Uniform" StrokeThickness="1.8"
+                          Stroke="{DynamicResource Grad.Pink}" StrokeLineJoin="Round"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          Data="M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 20 H17 L18 7 M10 11 V16 M14 11 V16"/>
+                    <TextBlock Text="{loc:L10n tab.bloat}" FontSize="15" FontWeight="SemiBold"
+                               Margin="9,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <WrapPanel Margin="0,12,0,0">
+                    <Button x:Name="BtnRemove" Style="{DynamicResource PrimaryButton}" Margin="0,0,8,8" Content="{loc:L10n bloat.remove}" Click="BtnRemove_Click"/>
+                    <Button x:Name="BtnRestore" Content="{loc:L10n bloat.restore}" Margin="0,0,8,8" Click="BtnRestore_Click"/>
+                    <Button x:Name="BtnRefresh" Content="{loc:L10n bloat.refresh}" Margin="0,0,8,8" Click="BtnRefresh_Click"/>
+                    <Button x:Name="BtnRestorePoint" Content="{loc:L10n tweaks.restorePoint}" Margin="0,0,8,8" Click="BtnRestorePoint_Click"/>
+                </WrapPanel>
+                <Grid Margin="0,4,0,0">
+                    <TextBox x:Name="TxtSearch" Padding="10,7" FontSize="13" TextChanged="TxtSearch_TextChanged"/>
+                    <TextBlock x:Name="TxtSearchHint" Text="{loc:L10n bloat.searchHint}"
+                               Foreground="{DynamicResource Brush.TextSecondary}" Margin="12,0,0,0"
+                               VerticalAlignment="Center" IsHitTestVisible="False"/>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Success}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L10n tweaks.risk.green}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Warning}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L10n tweaks.risk.yellow}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Danger}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L10n tweaks.risk.red}" Margin="5,0,0,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+                </StackPanel>
+                <TextBlock Text="{loc:L10n bloat.notice}" Margin="0,8,0,0" Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap" FontSize="12"/>
             </StackPanel>
-            <TextBlock Text="{loc:L10n bloat.notice}" Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap" FontSize="12"/>
-        </StackPanel>
+        </Border>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl x:Name="ItemsApps" Margin="8">
+            <ItemsControl x:Name="ItemsApps" Margin="12,2,14,12">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel/>
@@ -45,7 +57,17 @@
                 </ItemsControl.GroupStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="{DynamicResource Brush.Border}" BorderThickness="0,0,0,1" Padding="4,10">
+                        <Border BorderBrush="{DynamicResource Brush.Border}" BorderThickness="0,0,0,1" Padding="6,10">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>

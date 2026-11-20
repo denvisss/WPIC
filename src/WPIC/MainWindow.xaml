@@ -34,7 +34,7 @@
         </Border>
 
         <!-- Панель окружения: winget / Microsoft Store / драйвер сетевой карты -->
-        <Border DockPanel.Dock="Top" Margin="8,8,8,0" Padding="14,10" CornerRadius="10"
+        <Border DockPanel.Dock="Top" Margin="12,10,12,0" Padding="14,10" CornerRadius="10"
                 Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}"
                 BorderThickness="1">
             <Grid>

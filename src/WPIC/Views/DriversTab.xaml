@@ -4,7 +4,7 @@
              xmlns:loc="clr-namespace:WPIC.Services">
     <DockPanel>
         <!-- 1. Офлайн-подбор: главная функция вкладки -->
-        <Border DockPanel.Dock="Top" Margin="8,8,8,8" Padding="14" CornerRadius="10"
+        <Border DockPanel.Dock="Top" Margin="12,10,12,8" Padding="14" CornerRadius="10"
                 Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -67,7 +67,7 @@
         </Border>
 
         <!-- 3. Резервная копия: экспорт до переустановки, восстановление после -->
-        <Border DockPanel.Dock="Bottom" Margin="8,8,8,8" Padding="14" CornerRadius="10"
+        <Border DockPanel.Dock="Bottom" Margin="12,8,12,10" Padding="14" CornerRadius="10"
                 Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -111,7 +111,7 @@
         </Border>
 
         <!-- 2. Драйверы на этом ПК: список и проблемные устройства -->
-        <Border Margin="8,0,8,0" Padding="14" CornerRadius="10"
+        <Border Margin="12,0,12,0" Padding="14" CornerRadius="10"
                 Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
             <DockPanel>
                 <DockPanel DockPanel.Dock="Top" LastChildFill="False">

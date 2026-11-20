@@ -46,7 +46,17 @@
             </Setter>
         </Style>
         <DataTemplate x:Key="TweakRowTemplate">
-            <Border BorderBrush="{DynamicResource Brush.Border}" BorderThickness="0,0,0,1" Padding="4,10">
+            <Border BorderBrush="{DynamicResource Brush.Border}" BorderThickness="0,0,0,1" Padding="6,10">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -86,27 +96,39 @@
         </DataTemplate>
     </UserControl.Resources>
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Margin="8">
-            <WrapPanel>
-                <Button x:Name="BtnApply" Style="{DynamicResource PrimaryButton}" Margin="0,0,8,8" Content="{loc:L10n tweaks.apply}" Click="BtnApply_Click"/>
-                <Button x:Name="BtnUndo" Content="{loc:L10n tweaks.undo}" Margin="0,0,8,8" Click="BtnUndo_Click"/>
-                <Button x:Name="BtnRefresh" Content="{loc:L10n tweaks.refresh}" Margin="0,0,8,8" Click="BtnRefresh_Click"/>
-                <Button x:Name="BtnRestorePoint" Content="{loc:L10n tweaks.restorePoint}" Margin="0,0,8,8" Click="BtnRestorePoint_Click"/>
-                <Button x:Name="BtnRestoreBackup" Content="{loc:L10n tweaks.restoreBackup}" Margin="0,0,8,8" Click="BtnRestoreBackup_Click"/>
-            </WrapPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
-                <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Success}" VerticalAlignment="Center"/>
-                <TextBlock Text="{loc:L10n tweaks.risk.green}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
-                <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Warning}" VerticalAlignment="Center"/>
-                <TextBlock Text="{loc:L10n tweaks.risk.yellow}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
-                <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Danger}" VerticalAlignment="Center"/>
-                <TextBlock Text="{loc:L10n tweaks.risk.red}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
-                <TextBlock x:Name="TxtSelected" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        <Border DockPanel.Dock="Top" Margin="12,10,12,10" Padding="14" CornerRadius="10"
+                Background="{DynamicResource Brush.Surface}" BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Path Width="18" Height="18" Stretch="Uniform" StrokeThickness="1.8"
+                          Stroke="{DynamicResource Grad.Orange}" StrokeLineJoin="Round"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          Data="M4 7 H20 M4 17 H20 M9 4 V10 M15 14 V20"/>
+                    <TextBlock Text="{loc:L10n tweaks.title.system}" FontSize="15" FontWeight="SemiBold"
+                               Margin="9,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <WrapPanel Margin="0,12,0,0">
+                    <Button x:Name="BtnApply" Style="{DynamicResource PrimaryButton}" Margin="0,0,8,8" Content="{loc:L10n tweaks.apply}" Click="BtnApply_Click"/>
+                    <Button x:Name="BtnUndo" Content="{loc:L10n tweaks.undo}" Margin="0,0,8,8" Click="BtnUndo_Click"/>
+                    <Button x:Name="BtnRefresh" Content="{loc:L10n tweaks.refresh}" Margin="0,0,8,8" Click="BtnRefresh_Click"/>
+                    <Button x:Name="BtnRestorePoint" Content="{loc:L10n tweaks.restorePoint}" Margin="0,0,8,8" Click="BtnRestorePoint_Click"/>
+                    <Button x:Name="BtnRestoreBackup" Content="{loc:L10n tweaks.restoreBackup}" Margin="0,0,8,8" Click="BtnRestoreBackup_Click"/>
+                </WrapPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Success}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L10n tweaks.risk.green}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Warning}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L10n tweaks.risk.yellow}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource Brush.Danger}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{loc:L10n tweaks.risk.red}" Margin="5,0,16,0" Foreground="{DynamicResource Brush.TextSecondary}"/>
+                    <TextBlock x:Name="TxtSelected" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="{loc:L10n tweaks.notice}" Margin="0,8,0,0" Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap" FontSize="12"/>
             </StackPanel>
-            <TextBlock Text="{loc:L10n tweaks.notice}" Foreground="{DynamicResource Brush.TextSecondary}" TextWrapping="Wrap" FontSize="12"/>
-        </StackPanel>
+        </Border>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel x:Name="PanelGroups" Margin="8,8,12,8"/>
+            <StackPanel x:Name="PanelGroups" Margin="12,2,14,12"/>
         </ScrollViewer>
     </DockPanel>
 </UserControl>
