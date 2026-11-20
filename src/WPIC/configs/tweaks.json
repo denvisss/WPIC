@@ -531,6 +531,320 @@
           "undoCommand": "Dism /Online /Set-ReservedStorageState /State:Enabled"
         }
       ]
+    },
+    {
+      "id": "disable-location",
+      "category": "privacy",
+      "name": "Отключить геолокацию и «Найти устройство»",
+      "description": "Приложения перестанут получать местоположение устройства, а служба «Найти устройство» будет отключена. Картам и навигации придётся работать без определения координат.",
+      "risk": "yellow",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\LocationAndSensors", "valueName": "DisableLocation", "regType": "DWord", "value": "1" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\FindMyDevice", "valueName": "AllowFindMyDevice", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-ai-service",
+      "category": "privacy",
+      "name": "Отключить фоновую службу ИИ",
+      "description": "Служба ИИ-компонентов (WSAIFabricSvc) перестанет запускаться даже по требованию. Используется Copilot, Recall и Click to Do — если вы их отключили, служба вам не нужна.",
+      "risk": "green",
+      "minBuild": 26100,
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\WSAIFabricSvc", "valueName": "Start", "regType": "DWord", "value": "4" }
+      ]
+    },
+    {
+      "id": "disable-clicktodo",
+      "category": "privacy",
+      "name": "Отключить Click to Do",
+      "description": "Скрывает функцию Click to Do — выделение текста и объектов на экране с последующей обработкой ИИ. Дополнение к твикам Copilot и Recall. Только Windows 11 24H2 и новее.",
+      "risk": "green",
+      "minBuild": 26100,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Policies\\Microsoft\\Windows\\WindowsAI", "valueName": "DisableClickToDo", "regType": "DWord", "value": "1" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI", "valueName": "DisableClickToDo", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "hide-settings-ads",
+      "category": "privacy",
+      "name": "Скрыть рекламу Microsoft 365 в Параметрах",
+      "description": "Домашняя страница Параметров перестанет продвигать Microsoft 365 и предлагать войти в учётную запись Microsoft. На сами учётные записи и синхронизацию не влияет.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "valueName": "DisableConsumerAccountStateContent", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-edge-suggestions",
+      "category": "privacy",
+      "name": "Отключить рекламу и подсказки в Edge",
+      "description": "Новая вкладка Edge перестанет показывать новости, подборки, награды и рекламные блоки; браузер перестанет предлагать отзывы, подсказки и смену браузера по умолчанию. Влияет только на Microsoft Edge.",
+      "risk": "yellow",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "NewTabPageContentEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "NewTabPageHideDefaultTopSites", "regType": "DWord", "value": "1" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "EdgeShoppingAssistantEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "TabServicesEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "AlternateErrorPagesEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "UserFeedbackAllowed", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "ShowRecommendationsEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "WalletDonationEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "HideFirstRunExperience", "regType": "DWord", "value": "1" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "ShowMicrosoftRewards", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "DefaultBrowserSettingEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "DefaultBrowserSettingsCampaignEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "SpotlightExperiencesAndRecommendationsEnabled", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge", "valueName": "ShowAcrobatSubscriptionButton", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-mouse-acceleration",
+      "category": "system",
+      "name": "Выключить повышенную точность указателя",
+      "description": "Курсор движется один в один с движением мыши, без программного ускорения — предсказуемое поведение, привычное для игр и точной работы. Настройка мыши в Параметрах выключится.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Control Panel\\Mouse", "valueName": "MouseSpeed", "regType": "String", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Control Panel\\Mouse", "valueName": "MouseThreshold1", "regType": "String", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Control Panel\\Mouse", "valueName": "MouseThreshold2", "regType": "String", "value": "0" }
+      ]
+    },
+    {
+      "id": "remove-startup-delay",
+      "category": "system",
+      "name": "Убрать задержку запуска приложений при входе",
+      "description": "Программы из автозагрузки стартуют сразу после входа в систему, не дожидаясь системных таймеров. Первые секунды после входа могут нагружать слабые ПК сильнее.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize", "valueName": "Startupdelayinmsec", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize", "valueName": "WaitForIdleState", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-bitlocker-autoenc",
+      "category": "system",
+      "name": "Запретить автоматическое шифрование BitLocker",
+      "description": "Windows не включит шифрование диска автоматически при настройке системы — полезно, если шифрование не нужно. Уже включённое шифрование твик не отключает.",
+      "risk": "yellow",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\BitLocker", "valueName": "PreventDeviceEncryption", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-storage-sense",
+      "category": "system",
+      "name": "Отключить автоматическую очистку диска",
+      "description": "Storage Sense перестанет автоматически удалять временные файлы и очищать Корзину — файлы не пропадут без вашего ведома. Ручная очистка диска продолжает работать.",
+      "risk": "yellow",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy", "valueName": "01", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "disable-standby-networking",
+      "category": "system",
+      "name": "Отключить сеть в спящем режиме",
+      "description": "Ноутбук в современном спящем режиме перестанет держать сетевые подключения — меньше разряда батареи за ночь. После пробуждения сеть подключится заново. Вступает в силу после перезагрузки.",
+      "risk": "yellow",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9", "valueName": "ACSettingIndex", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9", "valueName": "DCSettingIndex", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "enable-dark-theme",
+      "category": "system",
+      "name": "Включить тёмную тему Windows",
+      "description": "Системные окна и приложения Windows переключатся на тёмную тему. Выбор темы в Параметрах останется доступным — откат вернёт прежнюю.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "valueName": "AppsUseLightTheme", "regType": "DWord", "value": "0" },
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "valueName": "SystemUsesLightTheme", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "enable-windows-sandbox",
+      "category": "system",
+      "name": "Включить Windows Sandbox",
+      "description": "Устанавливает одноразовую изолированную среду: запустили Sandbox, проверили сомнительный файл, закрыли — всё содержимое исчезло. Нужна поддержка виртуализации в BIOS/UEFI и перезагрузка после установки.",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "command",
+          "command": "Dism /Online /NoRestart /Enable-Feature /FeatureName:Containers-DisposableClientVM /All",
+          "undoCommand": "Dism /Online /NoRestart /Disable-Feature /FeatureName:Containers-DisposableClientVM"
+        }
+      ]
+    },
+    {
+      "id": "disable-snap-assist",
+      "category": "system",
+      "name": "Отключить подсказки при привязке окон",
+      "description": "При перетаскивании окна к краю экрана больше не будут появляться предложения заполнить свободное место другими окнами. Сама привязка окон продолжит работать.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "SnapAssist", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "alttab-hide-tabs",
+      "category": "system",
+      "name": "Не показывать вкладки браузера в Alt+Tab",
+      "description": "Alt+Tab будет показывать только окна программ, без отдельных вкладок Microsoft Edge и других браузеров — переключение станет быстрее и нагляднее.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "MultiTaskingAltTabFilter", "regType": "DWord", "value": "3" }
+      ]
+    },
+    {
+      "id": "no-update-reboot",
+      "category": "updates",
+      "name": "Не перезагружать ПК после обновлений",
+      "description": "Windows перестанет автоматически перезагружать компьютер после установки обновлений, пока за ним работают. Перезагрузка останется на ваше усмотрение; сами обновления продолжат устанавливаться.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "valueName": "NoAutoRebootWithLoggedOnUsers", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-wu-drivers",
+      "category": "updates",
+      "name": "Не получать драйверы через Центр обновления",
+      "description": "Центр обновления Windows перестанет автоматически устанавливать и менять драйверы устройств. Ставьте драйверы вручную или через вкладку «Драйверы». Применяется к будущим обновлениям.",
+      "risk": "yellow",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "valueName": "ExcludeWUDriversInQualityUpdate", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-companion-apps",
+      "category": "updates",
+      "name": "Запретить авто-загрузку приложений устройств",
+      "description": "Windows перестанет автоматически скачивать из интернета приложения и значки для подключённых устройств — мониторов, принтеров, гарнитур. Устройства продолжат работать на системных драйверах.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Device Metadata", "valueName": "PreventDeviceMetadataFromNetwork", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "updates-notify-first",
+      "category": "updates",
+      "name": "Уведомлять перед загрузкой обновлений",
+      "description": "Центр обновления сначала сообщит о новых обновлениях и подождёт подтверждения загрузки. Замедляет получение исправлений безопасности — включайте осознанно. Работает в Pro, Enterprise и Education, не в Home.",
+      "risk": "red",
+      "editions": ["Professional", "ProfessionalN", "ProfessionalEducation", "ProfessionalEducationN", "ProfessionalWorkstation", "ProfessionalWorkstationN", "Enterprise", "EnterpriseN", "EnterpriseS", "EnterpriseSN", "Education", "EducationN", "IoTEnterprise", "IoTEnterpriseS"],
+      "actions": [
+        { "type": "registry", "key": "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "valueName": "AUOptions", "regType": "DWord", "value": "2" }
+      ]
+    },
+    {
+      "id": "hide-taskbar-search",
+      "category": "start",
+      "name": "Скрыть поле поиска на панели задач",
+      "description": "Скрывает кнопку или поле поиска на панели задач. Поиск останется доступен по клавише Win и в меню Пуск.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "valueName": "SearchboxTaskbarMode", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "hide-taskview",
+      "category": "start",
+      "name": "Скрыть кнопку «Представление задач»",
+      "description": "Убирает кнопку «Представление задач» с панели задач. Сочетание Win+Tab и виртуальные рабочие столы продолжат работать.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "ShowTaskViewButton", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "taskbar-last-active",
+      "category": "start",
+      "name": "Переключение окон кликом по значку",
+      "description": "Повторные клики по значку приложения на панели задач переключают между его открытыми окнами вместо показа списка миниатюр.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "valueName": "LastActiveClick", "regType": "DWord", "value": "1" }
+      ]
+    },
+    {
+      "id": "disable-phonelink-start",
+      "category": "start",
+      "name": "Скрыть телефон из меню Пуск",
+      "description": "Раздел «Мобильные устройства» с предложением подключить телефон исчезнет из меню Пуск. Приложение «Связь с телефоном» не удаляется.",
+      "risk": "green",
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Start\\Companions\\Microsoft.YourPhone_8wekyb3d8bbwe", "valueName": "IsEnabled", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "hide-nav-home",
+      "category": "explorer",
+      "name": "Скрыть раздел «Главная» в панели Проводника",
+      "description": "Убирает раздел «Главная» из боковой панели Проводника — дерево папок начинается с «Этот компьютер».",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Classes\\CLSID\\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}", "valueName": "System.IsPinnedToNameSpaceTree", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "hide-nav-gallery",
+      "category": "explorer",
+      "name": "Скрыть раздел «Галерея» в панели Проводника",
+      "description": "Убирает раздел «Галерея» с фотографиями из боковой панели Проводника. Сами файлы не затрагиваются.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Classes\\CLSID\\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}", "valueName": "System.IsPinnedToNameSpaceTree", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "hide-nav-onedrive",
+      "category": "explorer",
+      "name": "Скрыть раздел OneDrive в панели Проводника",
+      "description": "Убирает OneDrive из боковой панели Проводника. Сам OneDrive не удаляется и продолжит синхронизацию.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Classes\\CLSID\\{018D5C66-4533-4307-9B53-224DE2ED1FE6}", "valueName": "System.IsPinnedToNameSpaceTree", "regType": "DWord", "value": "0" }
+      ]
+    },
+    {
+      "id": "hide-duplicate-drives",
+      "category": "explorer",
+      "name": "Скрыть дубликаты съёмных дисков",
+      "description": "Убирает второй значок флешки из боковой панели Проводника — диск останется только в «Этот компьютер». Требует перезапуска Проводника — выполняется автоматически.",
+      "risk": "yellow",
+      "actions": [
+        {
+          "type": "command",
+          "command": "reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Desktop\\NameSpace\\DelegateFolders\\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}\" /f & taskkill /f /im explorer.exe && start explorer.exe",
+          "undoCommand": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Desktop\\NameSpace\\DelegateFolders\\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}\" /f & taskkill /f /im explorer.exe && start explorer.exe"
+        }
+      ]
+    },
+    {
+      "id": "drive-letters-first",
+      "category": "explorer",
+      "name": "Буква диска перед названием",
+      "description": "В Проводнике буква диска отображается перед его названием (например «C: Windows»), что упрощает различение дисков.",
+      "risk": "green",
+      "signOutRequired": true,
+      "actions": [
+        { "type": "registry", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer", "valueName": "ShowDriveLettersFirst", "regType": "DWord", "value": "4" }
+      ]
     }
   ]
 }

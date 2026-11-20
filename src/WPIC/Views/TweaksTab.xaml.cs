@@ -12,7 +12,7 @@ namespace WPIC.Views;
 
 public partial class TweaksTab : UserControl
 {
-    private static readonly string[] CategoryOrder = { "explorer", "start", "privacy", "gaming", "system" };
+    private static readonly string[] CategoryOrder = { "explorer", "start", "privacy", "gaming", "system", "updates" };
 
     private static readonly Dictionary<string, (string Geometry, string Gradient)> CategoryIcons = new()
     {
@@ -20,7 +20,8 @@ public partial class TweaksTab : UserControl
         ["start"] = ("M4 4 H20 V20 H4 Z M4 15 H20 M7 17.5 H11", "Grad.Violet"),
         ["privacy"] = ("M12 3 L20 6 V11 C20 16 16.5 19.5 12 21 C7.5 19.5 4 16 4 11 V6 Z M8.5 11.5 L11 14 L15.5 9.5", "Grad.Green"),
         ["gaming"] = ("M7 8 H17 A5 5 0 0 1 22 13 L21.2 16.8 A2.4 2.4 0 0 1 17 17.6 L15.5 16 H8.5 L7 17.6 A2.4 2.4 0 0 1 2.8 16.8 L2 13 A5 5 0 0 1 7 8 Z M8 11 V15 M6 13 H10 M15.5 11.5 H15.51 M18 13.5 H18.01", "Grad.Pink"),
-        ["system"] = ("M4 7 H20 M4 17 H20 M9 4 V10 M15 14 V20", "Grad.Orange")
+        ["system"] = ("M4 7 H20 M4 17 H20 M9 4 V10 M15 14 V20", "Grad.Orange"),
+        ["updates"] = ("M4.5 12 A7.5 7.5 0 0 1 12 4.5 M12 4.5 H8 M12 4.5 V8.5 M19.5 12 A7.5 7.5 0 0 1 12 19.5 M12 19.5 H16 M12 19.5 V15.5", "Grad.Cyan")
     };
 
     private List<TweakVm> _items = new();

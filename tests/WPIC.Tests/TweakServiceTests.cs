@@ -202,15 +202,18 @@ public sealed class TweakServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CatalogHasThirtyEightTweaksAndCorrectOsBranches()
+    public async Task CatalogHasSixtyFiveTweaksAndCorrectOsBranches()
     {
         var catalog = await ConfigService.LoadTweaksAsync();
-        Assert.Equal(38, catalog.Tweaks.Count);
-        Assert.Equal(38, catalog.Tweaks.Select(t => t.Id).Distinct().Count());
-        var categories = new[] { "explorer", "start", "privacy", "gaming", "system" };
+        Assert.Equal(65, catalog.Tweaks.Count);
+        Assert.Equal(65, catalog.Tweaks.Select(t => t.Id).Distinct().Count());
+        var categories = new[] { "explorer", "start", "privacy", "gaming", "system", "updates" };
         Assert.All(catalog.Tweaks, t => Assert.Contains(t.Category, categories));
         Assert.All(catalog.Tweaks, t => Assert.Contains(t.Risk, new[] { "green", "yellow", "red" }));
         Assert.Equal(4, catalog.Tweaks.Count(t => t.Category == "gaming"));
+        Assert.Equal(4, catalog.Tweaks.Count(t => t.Category == "updates"));
+        Assert.True(TweakService.IsSupported(catalog.Tweaks.Single(t => t.Id == "disable-clicktodo"), 26100, "Professional"));
+        Assert.False(TweakService.IsSupported(catalog.Tweaks.Single(t => t.Id == "disable-clicktodo"), 22631, "Professional"));
         var widgets = catalog.Tweaks.Single(t => t.Id == "hide-taskbar-widgets");
         Assert.Equal("ShellFeedsTaskbarViewMode", Assert.Single(TweakService.ActionsForBuild(widgets, 19045)).ValueName);
         Assert.Equal("TaskbarDa", Assert.Single(TweakService.ActionsForBuild(widgets, 22000)).ValueName);
@@ -229,7 +232,7 @@ public sealed class TweakServiceTests : IDisposable
         Assert.True(TweakService.IsSupported(delivery, 19045, "Professional"));
         Assert.Equal("0", Assert.Single(delivery.Actions).Value);
         var commandIds = catalog.Tweaks.Where(t => t.Actions.Any(a => a.Type == "command")).Select(t => t.Id).ToHashSet();
-        Assert.Equal(new HashSet<string> { "disable-telemetry", "show-file-extensions", "show-hidden-files", "disable-hibernation", "classic-context-menu", "fast-folder-opening", "ultimate-performance", "disable-reserved-storage" }, commandIds);
+        Assert.Equal(new HashSet<string> { "disable-telemetry", "show-file-extensions", "show-hidden-files", "disable-hibernation", "classic-context-menu", "fast-folder-opening", "ultimate-performance", "disable-reserved-storage", "enable-windows-sandbox", "hide-duplicate-drives" }, commandIds);
         var ultimate = catalog.Tweaks.Single(t => t.Id == "ultimate-performance");
         Assert.All(ultimate.Actions, a => Assert.False(string.IsNullOrWhiteSpace(a.UndoCommand)));
         var classic = catalog.Tweaks.Single(t => t.Id == "classic-context-menu");
